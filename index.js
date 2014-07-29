@@ -480,7 +480,7 @@ $(function () {
 
             // A function that launches a Lyra editor window.
             f.launchLyra = function (qargs) {
-                var lyra = window.open("/lyra/index.html", "_blank");
+                var lyra = window.open(config.lyraURL + "/index.html", "_blank");
                 lyra.isNew = qargs.new;
                 lyra.onload = function () {
                     lyra.postMessage(qargs, window.location.origin);
