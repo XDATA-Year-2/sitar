@@ -62,6 +62,12 @@ module.exports = function (grunt) {
             },
             all: ["Gruntfile.js", "js/**/*.js"]
         },
+        jscs: {
+            src: "js/**/*.js",
+            options: {
+                validateIndentation: 4
+            }
+        },
         uglify: {
             index: {
                 options: {
@@ -78,11 +84,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jade");
     grunt.loadNpmTasks("grunt-contrib-stylus");
     grunt.loadNpmTasks("grunt-contrib-jshint");
+    grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-contrib-uglify");
 
     // Default task.
     grunt.registerTask("default", ["jade",
                                    "stylus",
                                    "jshint",
+                                   "jscs",
                                    "uglify"]);
 };
