@@ -1,0 +1,34 @@
+doctype html
+html
+    head
+        title Test Jade Template
+
+        link(rel="stylesheet" href="http://bootswatch.com/simplex/bootstrap.min.css")
+        link(rel="stylesheet" href="index.css")
+
+        script(src="http://code.jquery.com/jquery-1.11.1.min.js")
+        script(src="http://d3js.org/d3.v3.min.js" charset="utf-8")
+        script(src="js/index.min.js")
+
+    body
+        .container
+            .jumbotron
+                h1 Sitar Visualization Gallery
+
+                p.
+                  Explore your visualization powers and see what others have
+                  done.  Create, share, and collaborate at the click of your
+                  mouse.
+
+                p.
+                  #[a(href="#") Log in], #[a(href="#") register], or browse the
+                  examples below.
+
+                p.small: i.
+                     Powered by
+                     #[a(href="http://idl.cs.washington.edu/projects/lyra/") Lyra],
+                     #[a(href="http://tangelo.kitware.com") Tangelo],
+                     and #[a(href="https://github.com/girder/girder") Girder].
+
+        .container
+            #gallery
