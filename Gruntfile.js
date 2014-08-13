@@ -74,7 +74,9 @@ module.exports = function (grunt) {
                     sourceMap: true
                 },
                 files: {
-                    "build/js/index.min.js": ["js/index.js"]
+                    "build/js/index.min.js": ["js/index.js"],
+                    "build/js/lib.min.js": ["js/preamble.js",
+                                            "js/backbone-ui.js"]
                 }
             }
         }
