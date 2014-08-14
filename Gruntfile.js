@@ -1,20 +1,35 @@
-/* global module */
+/* jshint node: true */
 
 module.exports = function (grunt) {
     "use strict";
+
+    // Node modules.
+    var path = require("path");
 
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         jade: {
-            release: {
+            static: {
                 options: {
                     data: {
                         debug: false
                     }
                 },
                 files: {
-                    "build/index.html": "jade/index.jade"
+                    "build/site/index.html": "jade/index.jade"
+                }
+            },
+            template: {
+                options: {
+                    client: true,
+                    namespace: "app.templates",
+                    processName: function (filename) {
+                        return path.basename(filename, ".jade");
+                    }
+                },
+                files: {
+                    "build/jade/templates.js": ["jade/templates/**/*.jade"]
                 }
             }
         },
@@ -22,7 +37,7 @@ module.exports = function (grunt) {
             compile: {
                 options: {},
                 files: {
-                    "build/index.css": "styl/index.styl"
+                    "build/site/index.css": "styl/index.styl"
                 }
             }
         },
@@ -36,7 +51,6 @@ module.exports = function (grunt) {
                 eqeqeq: true,
                 forin: true,
                 immed: true,
-                indent: 4,
                 latedef: true,
                 newcap: true,
                 noempty: false,
@@ -60,10 +74,10 @@ module.exports = function (grunt) {
                 // Environment options.
                 browser: true
             },
-            all: ["Gruntfile.js", "js/**/*.js"]
+            all: ["Gruntfile.js", "js/src/**/*.js"]
         },
         jscs: {
-            src: "js/**/*.js",
+            src: "js/src/**/*.js",
             options: {
                 validateIndentation: 4
             }
@@ -74,9 +88,11 @@ module.exports = function (grunt) {
                     sourceMap: true
                 },
                 files: {
-                    "build/js/index.min.js": ["js/index.js"],
-                    "build/js/lib.min.js": ["js/preamble.js",
-                                            "js/backbone-ui.js"]
+                    "build/site/js/index.min.js": ["js/src/index.js"],
+                    "build/site/js/lib.min.js": ["js/ext/jade-runtime.js",
+                                                 "build/jade/templates.js",
+                                                 "js/src/preamble.js",
+                                                 "js/src/backbone-ui.js"]
                 }
             }
         },

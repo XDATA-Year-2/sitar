@@ -110,7 +110,11 @@
         },
 
         render: function () {
-            this.$el.text(JSON.stringify(this.collection.models));
+            var template = app.templates.galleryExample({
+                name: "Ravi",
+                data: JSON.stringify(this.collection.models)
+            });
+            this.$el.html(template);
         }
     });
 
