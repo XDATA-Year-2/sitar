@@ -79,7 +79,8 @@ module.exports = function (grunt) {
                                             "js/backbone-ui.js"]
                 }
             }
-        }
+        },
+        clean: ["build"]
     });
 
     // Load plugins.
@@ -88,6 +89,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.loadNpmTasks("grunt-contrib-clean");
 
     // Default task.
     grunt.registerTask("default", ["jade",
