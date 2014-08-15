@@ -63,7 +63,7 @@
 
                 // Extract and collect the necessary properties from the
                 // results.
-                attrib.name = item.name;
+                attrib.title = item.name;
                 attrib.description = item.description;
                 attrib.posterId = posterFile._id;
                 attrib.vegaId = vegaFile._id;
@@ -161,7 +161,9 @@
 
         render: function () {
             var html = app.templates.galleryItem({
-                posterUrl: app.girder + "/file/" + this.model.get("posterId") + "/download"
+                posterUrl: app.girder + "/file/" + this.model.get("posterId") + "/download",
+                title: this.model.get("title"),
+                description: this.model.get("description")
             });
 
             console.log(html);
