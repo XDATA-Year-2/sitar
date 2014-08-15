@@ -1,5 +1,5 @@
 /* jshint browser: true, devel: true */
-/* global Backbone, _ */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -8,7 +8,7 @@
     //
     // TODO: make this dependent on either configuration, or a utility in
     // Tangelo that tells what this path is.
-    app.baseUrl = "/girder/api/v1";
+    app.girder = "/girder/api/v1";
 
     // Some namespaces for Backbone stuff.
     app.models = {};
@@ -37,7 +37,7 @@
                 throw new Error("must supply 'id' attribute");
             }
 
-            this.baseUrl = app.baseUrl + "/item/" + this.id;
+            this.baseUrl = app.girder + "/item/" + this.id;
             this.fetch();
         },
 
@@ -107,17 +107,67 @@
             if (!this.collection) {
                 throw new Error("fatal: must specify 'collection'");
             }
+
+            if (!this.el) {
+                throw new Error("fatal: must specify 'el'");
+            }
+
+            d3.select(this.el)
+                .classed("container", true);
+
+            this.items = [];
         },
 
         render: function () {
-            var template = app.templates.galleryExample({
-                name: "Ravi",
-                data: JSON.stringify(this.collection.models)
-            });
-            this.$el.html(template);
+            var row;
+
+            this.collection.each(_.bind(function (visfile, i) {
+                var view,
+                    div;
+
+                // Every five items, create a new row element.
+                if (i % 5 === 0) {
+                    row = d3.select(this.el)
+                        .append("div")
+                        .classed("row", true);
+                }
+
+                // Create a GalleryItem and attach it to a new div.
+                div = row.append("div")
+                    .classed("col-md-2", true)
+                    .node();
+
+                view = new app.views.GalleryItem({
+                    model: visfile,
+                    el: div
+                });
+
+                this.items.push(view);
+                view.render();
+            }, this));
         }
     });
 
     app.views.GalleryItem = Backbone.View.extend({
+        initialize: function () {
+            this.posterUrl = this.attributes && this.attributes.posterUrl;
+
+            if (!this.model) {
+                throw new Error("fatal: must supply 'model' property");
+            }
+
+            this.listenTo(this.model, "change", this.render);
+        },
+
+        render: function () {
+            var html = app.templates.galleryItem({
+                posterUrl: app.girder + "/file/" + this.model.get("posterId") + "/download"
+            });
+
+            console.log(html);
+
+            d3.select(this.el)
+                .html(html);
+        }
     });
 }(window.app));

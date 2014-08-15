@@ -9,7 +9,7 @@ $(function () {
     // Get a list of visualizations.
     $.ajax({
         method: "GET",
-        url: app.baseUrl + "/collection",
+        url: app.girder + "/collection",
         data: {
             text: "sitar"
         },
@@ -27,7 +27,7 @@ $(function () {
 
             $.ajax({
                 method: "GET",
-                url: app.baseUrl + "/folder",
+                url: app.girder + "/folder",
                 data: {
                     parentType: "collection",
                     parentId: sitar._id,
@@ -47,7 +47,7 @@ $(function () {
 
                     $.ajax({
                         method: "GET",
-                        url: app.baseUrl + "/item",
+                        url: app.girder + "/item",
                         data: {
                             folderId: visFolder._id
                         },
@@ -67,7 +67,8 @@ $(function () {
                             // view to work with that collection.
                             items = new app.collections.VisFiles(visIds);
                             gallery = new app.views.Gallery({
-                                collection: items
+                                collection: items,
+                                el: "#gallery"
                             });
 
                             // Trigger a gallery re-render whenever the
@@ -75,9 +76,6 @@ $(function () {
                             items.on("add remove reset change", function () {
                                 gallery.render();
                             });
-
-                            // Attach the gallery to the gallery element.
-                            $("#gallery").append(gallery.el);
                         }
                     });
                 }
