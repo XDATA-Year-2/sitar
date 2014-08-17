@@ -1,5 +1,5 @@
 /* jshint browser: true, jquery: true, devel: true */
-/* global _ */
+/* global _, Backbone */
 
 $(function () {
     "use strict";
@@ -54,9 +54,14 @@ $(function () {
                         dataType: "json",
                         success: function (vis) {
                             var visIds,
-                                items,
                                 gallery;
 
+                            // Start the router.
+                            app.router = new app.routers.Router();
+                            Backbone.history.start();
+
+                            // Convert the list of file results into an id
+                            // object.
                             visIds = _.map(vis, function (v) {
                                 return {
                                     id: v._id
@@ -65,15 +70,15 @@ $(function () {
 
                             // Create a collection of vis files, and a gallery
                             // view to work with that collection.
-                            items = new app.collections.VisFiles(visIds);
+                            app.files = new app.collections.VisFiles(visIds);
                             gallery = new app.views.Gallery({
-                                collection: items,
+                                collection: app.files,
                                 el: "#gallery"
                             });
 
                             // Trigger a gallery re-render whenever the
                             // collection changes.
-                            items.on("add remove reset change", function () {
+                            app.files.on("add remove reset change", function () {
                                 gallery.render();
                             });
                         }

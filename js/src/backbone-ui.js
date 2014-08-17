@@ -14,6 +14,7 @@
     app.models = {};
     app.collections = {};
     app.views = {};
+    app.routers = {};
 
     // A model of a "vis file".  This is conceptualized as the following list of
     // information:
@@ -159,6 +160,10 @@
             this.listenTo(this.model, "change", this.render);
         },
 
+        openItemView: function () {
+            app.router.navigate("item/" + this.model.get("id"), {trigger: true});
+        },
+
         render: function () {
             var html = app.templates.galleryItem({
                 posterUrl: app.girder + "/file/" + this.model.get("posterId") + "/download",
@@ -166,10 +171,28 @@
                 description: this.model.get("description")
             });
 
-            console.log(html);
-
             d3.select(this.el)
                 .html(html);
+
+            // Attach a click handler to the thumbnail image.
+            d3.select(this.el)
+                .select("a.thumbnail")
+                .on("click", _.bind(this.openItemView, this));
+        }
+    });
+
+    app.routers.Router = Backbone.Router.extend({
+        routes: {
+            "": "gallery",
+            "item/:itemId": "item"
+        },
+
+        gallery: function () {
+            console.log("back to gallery!");
+        },
+
+        item: function (itemId) {
+            console.log("viewing item " + itemId);
         }
     });
 }(window.app));
