@@ -92,8 +92,11 @@ module.exports = function (grunt) {
                     "build/site/js/lib.min.js": ["js/ext/jade-runtime.js",
                                                  "build/jade/templates.js",
                                                  "js/src/preamble.js",
-                                                 "js/src/backbone-ui.js",
-                                                 "js/src/RadioDisplay.js"]
+                                                 "js/src/RadioDisplay.js",
+                                                 "js/src/ui/model.js",
+                                                 "js/src/ui/collection.js",
+                                                 "js/src/ui/view.js",
+                                                 "js/src/ui/router.js"]
                 }
             }
         },

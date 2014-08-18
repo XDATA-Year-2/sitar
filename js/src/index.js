@@ -56,10 +56,6 @@ $(function () {
                             var visIds,
                                 gallery;
 
-                            // Start the router.
-                            app.router = new app.routers.Router();
-                            Backbone.history.start();
-
                             // Convert the list of file results into an id
                             // object.
                             visIds = _.map(vis, function (v) {
@@ -70,8 +66,8 @@ $(function () {
 
                             // Create a collection of vis files, and a gallery
                             // view to work with that collection.
-                            app.files = new app.collections.VisFiles(visIds);
-                            gallery = new app.views.Gallery({
+                            app.files = new app.collection.VisFiles(visIds);
+                            gallery = new app.view.Gallery({
                                 collection: app.files,
                                 el: "#gallery"
                             });
@@ -81,6 +77,21 @@ $(function () {
                             app.files.on("add remove reset change", function () {
                                 gallery.render();
                             });
+
+                            // Create a "radio button" abstraction over the
+                            // various "pages" that can appear in the main area
+                            // - the gallery overview, and an item view.
+                            app.radio = new app.util.RadioDisplay({
+                                classes: {
+                                    remove: ["hidden"]
+                                }
+                            });
+                            app.radio.addElement("gallery", "#gallery");
+                            app.radio.addElement("itemview", "#itemview");
+
+                            // Start the router.
+                            app.router = new app.router.Router();
+                            Backbone.history.start();
                         }
                     });
                 }
