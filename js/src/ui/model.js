@@ -28,7 +28,6 @@
                 }
 
                 this.baseUrl = app.girder + "/item/" + this.id;
-                this.fetch();
             },
 
             fetch: function () {
@@ -72,7 +71,7 @@
                 // for the files contained within (the poster image and the actual
                 // vega spec).
                 _.each(urls, function (url) {
-                    Backbone.$.ajax({
+                    Backbone.ajax({
                         method: "GET",
                         url: url,
                         dataType: "json",

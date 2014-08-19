@@ -1,5 +1,5 @@
 /* jshint browser: true, devel: true */
-/* global Backbone, _, d3 */
+/* global Backbone, _, d3, vg */
 
 (function (app) {
     "use strict";
@@ -8,8 +8,6 @@
         // A preview gallery of the vis files in a VisFiles collection.  Made up
         // of GalleryItems, arranged in rows on the screen.
         Gallery: Backbone.View.extend({
-            tagName: "verbatim",
-
             initialize: function () {
                 if (!this.collection) {
                     throw new Error("fatal: must specify 'collection'");
@@ -23,12 +21,22 @@
                     .classed("container", true);
 
                 this.items = [];
+
+                // Trigger a render whenever the collection changes.
+                //
+                // TODO: this is harder than it seems.  Really we want to know
+                // if the *files* have changed on the server.  We may need to
+                // listen to a different set of models, or somehow detect when
+                // the title/description/poster have changed.  Commented out for
+                // now as it's not really effective as is.
+                //
+                //this.collection.on("add remove reset change", this.render, this);
             },
 
             render: function () {
                 var row;
 
-                this.collection.each(_.bind(function (visfile, i) {
+                this.collection.each(function (visfile, i) {
                     var view,
                         div;
 
@@ -50,8 +58,7 @@
                     });
 
                     this.items.push(view);
-                    view.render();
-                }, this));
+                }, this);
             }
         }),
 
@@ -63,7 +70,8 @@
                     throw new Error("fatal: must supply 'model' property");
                 }
 
-                this.listenTo(this.model, "change", this.render);
+                this.model.on("change", this.render, this);
+                this.model.fetch();
             },
 
             openItemView: function () {
@@ -86,6 +94,44 @@
                     .on("click", _.bind(this.openItemView, this));
             }
         }),
+
+        Item: Backbone.View.extend({
+            initialize: function () {
+                if (!this.model) {
+                    throw new Error("fatal: must specify a model");
+                }
+
+                this.model.on("change", this.render, this);
+                this.model.fetch();
+            },
+
+            render: function () {
+                var elt;
+
+                // Populate the div with the template text.
+                d3.select(this.el)
+                    .html(app.templates.item());
+
+                elt = d3.select(this.el)
+                    .select(".vis")
+                    .node();
+
+                // Retrieve the vega specification from Girder and render it
+                // when it arrives.
+                Backbone.ajax({
+                    method: "GET",
+                    url: app.girder + "/file/" + this.model.get("vegaId") + "/download",
+                    dataType: "json",
+                    success: function (spec) {
+                        vg.parse.spec(spec, function (chart) {
+                            chart({
+                                el: elt,
+                                renderer: "svg"
+                            }).update();
+                        });
+                    }
+                });
+            }
+        })
     };
 }(window.app));
-

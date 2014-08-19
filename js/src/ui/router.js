@@ -16,8 +16,19 @@
             },
 
             item: function (itemId) {
+                var view,
+                    model;
+
                 app.radio.select("itemview");
-                console.log(itemId);
+
+                model = new app.model.VisFile({
+                    id: itemId
+                });
+
+                view = new app.view.Item({
+                    el: "#itemview",
+                    model: model
+                });
             }
         })
     };

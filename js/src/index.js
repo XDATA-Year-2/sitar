@@ -64,19 +64,12 @@ $(function () {
                                 };
                             });
 
-                            // Create a collection of vis files, and a gallery
-                            // view to work with that collection.
-                            app.files = new app.collection.VisFiles(visIds);
+                            // Create a gallery view to work with the vis files.
                             gallery = new app.view.Gallery({
-                                collection: app.files,
+                                collection: new app.collection.VisFiles(visIds),
                                 el: "#gallery"
                             });
-
-                            // Trigger a gallery re-render whenever the
-                            // collection changes.
-                            app.files.on("add remove reset change", function () {
-                                gallery.render();
-                            });
+                            gallery.render();
 
                             // Create a "radio button" abstraction over the
                             // various "pages" that can appear in the main area
