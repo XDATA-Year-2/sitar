@@ -150,6 +150,35 @@
                 });
             },
 
+            pngURL: function () {
+                var canvas,
+                    png,
+                    arrayBuf,
+                    intArray;
+
+                // Grab the canvas element containing the painted visualization.
+                canvas = d3.select(this.el)
+                    .select("canvas")
+                    .node();
+
+                // Get the base64-encoded PNG data, and convert it to raw bytes.
+                png = window.atob(canvas.toDataURL("image/png").split(",")[1]);
+
+                // Stuff the PNG data into an ArrayBuffer - this step is
+                // necessary to creating a Blob URL, which in turn is necessary
+                // because using a raw data URI causes buggy behavior in some
+                // versions of Chrome.  See
+                // https://code.google.com/p/chromium/issues/detail?id=373182.
+                arrayBuf = new ArrayBuffer(png.length);
+                intArray = new Uint8Array(arrayBuf);
+                _.each(intArray, function (_, i) {
+                    intArray[i] = png.charCodeAt(i);
+                });
+
+                // Create a blob URL and return it.
+                return URL.createObjectURL(new Blob([arrayBuf], {type: "image/png"}));
+            },
+
             render: function () {
                 var me = d3.select(this.el);
 
@@ -182,9 +211,8 @@
                         // Attach some click handlers to deal with export
                         // requests in various formats.
                         //
-                        // On clicking the SVG export button, render the Vega
-                        // spec to an invisible (non-DOM) element, extract the
-                        // SVG text, and save it to the user's hard drive.
+                        // SVG export - call the SVG URL method and download via
+                        // an anchor element and simulated click.
                         me.select("a.export-svg")
                             .on("click", _.bind(function () {
                                 this.svgURL(_.bind(function (url) {
@@ -198,6 +226,24 @@
                                     a.setAttribute("href", url);
                                     a.click();
                                 }, this));
+                            }, this));
+
+                        // PNG export - same as above but use the PNG URL method
+                        // instead.
+                        me.select("a.export-png")
+                            .on("click", _.bind(function () {
+                                var url,
+                                    a;
+
+                                // Get a URL encoding the PNG.
+                                url = this.pngURL();
+
+                                // Simulate a user click on an anchor tag that
+                                // has the data embedded in it.
+                                a = document.createElement("a");
+                                a.setAttribute("download", this.model.get("title") + ".png");
+                                a.setAttribute("href", url);
+                                a.click();
                             }, this));
                     }, this)
                 });
