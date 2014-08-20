@@ -179,6 +179,11 @@
                 return URL.createObjectURL(new Blob([arrayBuf], {type: "image/png"}));
             },
 
+            vegaURL: function () {
+                var vegaText = JSON.stringify(this.vega, null, 4);
+                return URL.createObjectURL(new Blob([vegaText], {type: "application/json"}));
+            },
+
             render: function () {
                 var me = d3.select(this.el);
 
@@ -242,6 +247,23 @@
                                 // has the data embedded in it.
                                 a = document.createElement("a");
                                 a.setAttribute("download", this.model.get("title") + ".png");
+                                a.setAttribute("href", url);
+                                a.click();
+                            }, this));
+
+                        // Vega export - use the Vega URL method this time.
+                        me.select("a.export-vega")
+                            .on("click", _.bind(function () {
+                                var url,
+                                    a;
+
+                                // Get a URL encoding the PNG.
+                                url = this.vegaURL();
+
+                                // Simulate a user click on an anchor tag that
+                                // has the data embedded in it.
+                                a = document.createElement("a");
+                                a.setAttribute("download", this.model.get("title") + ".json");
                                 a.setAttribute("href", url);
                                 a.click();
                             }, this));
