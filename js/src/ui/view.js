@@ -105,6 +105,51 @@
                 this.model.fetch();
             },
 
+            svgURL: function (callback) {
+                // This creates a data URL reflecting the SVG representation of
+                // the Vega spec.  This includes an XML header and a DOCTYPE
+                // declaration, as needed to make the resulting file a
+                // standalone SVG file that can, e.g., be rendered directly in a
+                // web browser or other software.
+
+                vg.parse.spec(this.vega, function (chart) {
+                    var div,
+                        svg,
+                        xml = "<?xml version=\"1.0\" standalone=\"no\"?>",
+                        doctype = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
+                        xmlns = "http://www.w3.org/2000/svg",
+                        dataURL;
+
+                    // Construct a div element.
+                    div = document.createElement("div");
+
+                    // Render the Vega spec to this
+                    // free-floating div as an SVG
+                    // visualization.
+                    chart({
+                        renderer: "svg",
+                        el: div
+                    }).update();
+
+                    // Extract the HTML for the SVG element.
+                    svg = d3.select(div)
+                        .select("div")
+                        .select("svg");
+
+                    // Put some SVG-XML specific attributes in
+                    // the SVG element.
+                    svg.attr("class", null)
+                        .attr("version", "1.1")
+                        .attr("xmlns", xmlns);
+
+                    // Construct a data URL.
+                    dataURL = URL.createObjectURL(new Blob([xml, doctype, svg.node().outerHTML], {type: "text/svg+xml"}));
+
+                    // Invoke the callback with the URL.
+                    callback(dataURL);
+                });
+            },
+
             render: function () {
                 var me = d3.select(this.el);
 
@@ -118,63 +163,42 @@
                     url: app.girder + "/file/" + this.model.get("vegaId") + "/download",
                     dataType: "json",
                     success: _.bind(function (spec) {
+                        // TODO: really the spec should be stored in a different
+                        // kind of model, one that has a "save" action to push a
+                        // changed Vega spec back to Girder in case in changes
+                        // (via editing, or rebinding data to it).
+                        this.vega = spec;
+
+                        // Render the spec to the main canvas element.
                         vg.parse.spec(spec, function (chart) {
+                            // TODO: cache "chart" so that the vega spec doesn't
+                            // need to be rendered again in svgURL() above?
                             chart({
                                 el: me.select(".vis").node(),
                                 renderer: "canvas"
                             }).update();
                         });
 
+                        // Attach some click handlers to deal with export
+                        // requests in various formats.
+                        //
                         // On clicking the SVG export button, render the Vega
                         // spec to an invisible (non-DOM) element, extract the
                         // SVG text, and save it to the user's hard drive.
                         me.select("a.export-svg")
                             .on("click", _.bind(function () {
-                                vg.parse.spec(spec, _.bind(function (chart){
-                                    var div,
-                                        svg,
-                                        xml = "<?xml version=\"1.0\" standalone=\"no\"?>",
-                                        doctype = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
-                                        xmlns = "http://www.w3.org/2000/svg",
-                                        a;
-
-                                    // Construct a div element.
-                                    div = document.createElement("div");
-
-                                    // Render the Vega spec to this
-                                    // free-floating div as an SVG
-                                    // visualization.
-                                    chart({
-                                        renderer: "svg",
-                                        el: div
-                                    }).update();
-
-                                    // Extract the HTML for the SVG element.
-                                    svg = d3.select(div)
-                                        .select("div")
-                                        .select("svg");
-
-                                    // Put some SVG-XML specific attributes in
-                                    // the SVG element.
-                                    svg.attr("class", null)
-                                        .attr("version", "1.1")
-                                        .attr("xmlns", xmlns);
+                                this.svgURL(_.bind(function (url) {
+                                    var a;
 
                                     // Create a (non-DOM) anchor element with
                                     // the SVG data embedded in it, and simulate
                                     // a click action on it.
-                                    //
-                                    // The "SVG data" includes an XML header and
-                                    // a DOCTYPE declaration, as needed to make
-                                    // the resulting file a standalone SVG file
-                                    // that can, e.g., be rendered directly in a
-                                    // web browser or other software.
                                     a = document.createElement("a");
                                     a.setAttribute("download", this.model.get("title") + ".svg");
-                                    a.setAttribute("href", URL.createObjectURL(new Blob([xml, doctype, svg.node().outerHTML], {type: "text/svg+xml"})));
+                                    a.setAttribute("href", url);
                                     a.click();
                                 }, this));
-                            },this));
+                            }, this));
                     }, this)
                 });
             }
