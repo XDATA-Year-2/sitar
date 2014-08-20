@@ -204,69 +204,48 @@
                         this.vega = spec;
 
                         // Render the spec to the main canvas element.
-                        vg.parse.spec(spec, function (chart) {
+                        vg.parse.spec(spec, _.bind(function (chart) {
+                            var exporter,
+                                title;
+
                             // TODO: cache "chart" so that the vega spec doesn't
                             // need to be rendered again in svgURL() above?
                             chart({
                                 el: me.select(".vis").node(),
                                 renderer: "canvas"
                             }).update();
-                        });
 
-                        // Attach some click handlers to deal with export
-                        // requests in various formats.
-                        //
-                        // SVG export - call the SVG URL method and download via
-                        // an anchor element and simulated click.
-                        me.select("a.export-svg")
-                            .on("click", _.bind(function () {
-                                this.svgURL(_.bind(function (url) {
-                                    var a;
-
-                                    // Create a (non-DOM) anchor element with
-                                    // the SVG data embedded in it, and simulate
-                                    // a click action on it.
-                                    a = document.createElement("a");
-                                    a.setAttribute("download", this.model.get("title") + ".svg");
+                            exporter = function (url, savefile) {
+                                return function () {
+                                    var a = document.createElement("a");
+                                    a.setAttribute("download", savefile);
                                     a.setAttribute("href", url);
                                     a.click();
+                                };
+                            };
+
+                            // Attach some click handlers to deal with export
+                            // requests in various formats.
+                            //
+                            // SVG export - call the SVG URL method and download via
+                            // an anchor element and simulated click.
+                            title = this.model.get("title");
+                            me.select("a.export-svg")
+                                .on("click", _.bind(function () {
+                                    this.svgURL(function (url) {
+                                        exporter(url, title + ".svg")();
+                                    });
                                 }, this));
-                            }, this));
 
-                        // PNG export - same as above but use the PNG URL method
-                        // instead.
-                        me.select("a.export-png")
-                            .on("click", _.bind(function () {
-                                var url,
-                                    a;
+                            // PNG export - same as above but use the PNG URL method
+                            // instead.
+                            me.select("a.export-png")
+                                .on("click", exporter(this.pngURL(), title + ".png"));
 
-                                // Get a URL encoding the PNG.
-                                url = this.pngURL();
-
-                                // Simulate a user click on an anchor tag that
-                                // has the data embedded in it.
-                                a = document.createElement("a");
-                                a.setAttribute("download", this.model.get("title") + ".png");
-                                a.setAttribute("href", url);
-                                a.click();
-                            }, this));
-
-                        // Vega export - use the Vega URL method this time.
-                        me.select("a.export-vega")
-                            .on("click", _.bind(function () {
-                                var url,
-                                    a;
-
-                                // Get a URL encoding the PNG.
-                                url = this.vegaURL();
-
-                                // Simulate a user click on an anchor tag that
-                                // has the data embedded in it.
-                                a = document.createElement("a");
-                                a.setAttribute("download", this.model.get("title") + ".json");
-                                a.setAttribute("href", url);
-                                a.click();
-                            }, this));
+                            // Vega export - use the Vega URL method this time.
+                            me.select("a.export-vega")
+                                .on("click", exporter(this.vegaURL(), title + ".json"));
+                        }, this));
                     }, this)
                 });
             }
