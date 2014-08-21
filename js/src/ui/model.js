@@ -26,11 +26,6 @@
         // the Gallery view, and also a more detailed view for an individual item,
         // which will also enable editing/saving/etc.
         VisFile: Backbone.Model.extend({
-            constructor: function (models, options) {
-                this.options = options || {};
-                Backbone.Model.apply(this, arguments);
-            },
-
             initialize: function () {
                 if (!this.id) {
                     throw new Error("must supply 'id' attribute");
@@ -39,7 +34,30 @@
                 this.baseUrl = app.girder + "/item/" + this.id;
             },
 
-            fetch: function () {
+            sync: function (method, model, options) {
+                switch (method) {
+                    case "create":
+                        Backbone.sync.apply(this, arguments);
+                        break;
+
+                    case "read":
+                        this.fetchHandler(options);
+                        break;
+
+                    case "update":
+                        Backbone.sync.apply(this, arguments);
+                        break;
+
+                    case "delete":
+                        Backbone.sync.apply(this, arguments);
+                        break;
+
+                    default:
+                        throw new Error("illegal condition: sync method was '" + method + "'");
+                }
+            },
+
+            fetchHandler: function (options) {
                 var urls = [this.baseUrl, this.baseUrl + "/files"],
                     results = [],
                     callback,
@@ -68,7 +86,7 @@
 
                     // If requested, retrieve the Vega spec itself, then set the
                     // attributes; otherwise, just set the attributes.
-                    if (this.options.fetchVega) {
+                    if (options.fetchVega) {
                         Backbone.ajax({
                             method: "GET",
                             url: app.girder + "/file/" + vegaFile._id + "/download",

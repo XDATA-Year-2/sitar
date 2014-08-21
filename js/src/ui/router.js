@@ -23,13 +23,15 @@
 
                 model = new app.model.VisFile({
                     id: itemId
-                }, {
-                    fetchVega: true
                 });
 
                 view = new app.view.Item({
                     el: "#itemview",
                     model: model
+                });
+
+                model.fetch({
+                    fetchVega: true
                 });
             }
         })

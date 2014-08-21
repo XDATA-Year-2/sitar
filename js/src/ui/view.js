@@ -102,7 +102,6 @@
                 }
 
                 this.model.on("change", this.render, this);
-                this.model.fetch();
             },
 
             svgURL: function (callback) {
