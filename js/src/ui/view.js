@@ -112,7 +112,7 @@
                 // standalone SVG file that can, e.g., be rendered directly in a
                 // web browser or other software.
 
-                vg.parse.spec(this.vega, function (chart) {
+                vg.parse.spec(this.model.get("vega"), function (chart) {
                     var div,
                         svg,
                         xml = "<?xml version=\"1.0\" standalone=\"no\"?>",
@@ -180,7 +180,7 @@
             },
 
             vegaURL: function () {
-                var vegaText = JSON.stringify(this.vega, null, 4);
+                var vegaText = JSON.stringify(this.model.get("vega"), null, 4);
                 return URL.createObjectURL(new Blob([vegaText], {type: "application/json"}));
             },
 
@@ -190,64 +190,49 @@
                 // Populate the div with the template text.
                 me.html(app.templates.item());
 
-                // Retrieve the vega specification from Girder and render it
-                // when it arrives.
-                Backbone.ajax({
-                    method: "GET",
-                    url: app.girder + "/file/" + this.model.get("vegaId") + "/download",
-                    dataType: "json",
-                    success: _.bind(function (spec) {
-                        // TODO: really the spec should be stored in a different
-                        // kind of model, one that has a "save" action to push a
-                        // changed Vega spec back to Girder in case in changes
-                        // (via editing, or rebinding data to it).
-                        this.vega = spec;
+                // Render the spec to the main canvas element.
+                vg.parse.spec(this.model.get("vega"), _.bind(function (chart) {
+                    var exporter,
+                        title;
 
-                        // Render the spec to the main canvas element.
-                        vg.parse.spec(spec, _.bind(function (chart) {
-                            var exporter,
-                                title;
+                    // TODO: cache "chart" so that the vega spec doesn't
+                    // need to be rendered again in svgURL() above?
+                    chart({
+                        el: me.select(".vis").node(),
+                        renderer: "canvas"
+                    }).update();
 
-                            // TODO: cache "chart" so that the vega spec doesn't
-                            // need to be rendered again in svgURL() above?
-                            chart({
-                                el: me.select(".vis").node(),
-                                renderer: "canvas"
-                            }).update();
+                    exporter = function (url, savefile) {
+                        return function () {
+                            var a = document.createElement("a");
+                            a.setAttribute("download", savefile);
+                            a.setAttribute("href", url);
+                            a.click();
+                        };
+                    };
 
-                            exporter = function (url, savefile) {
-                                return function () {
-                                    var a = document.createElement("a");
-                                    a.setAttribute("download", savefile);
-                                    a.setAttribute("href", url);
-                                    a.click();
-                                };
-                            };
-
-                            // Attach some click handlers to deal with export
-                            // requests in various formats.
-                            //
-                            // SVG export - call the SVG URL method and download via
-                            // an anchor element and simulated click.
-                            title = this.model.get("title");
-                            me.select("a.export-svg")
-                                .on("click", _.bind(function () {
-                                    this.svgURL(function (url) {
-                                        exporter(url, title + ".svg")();
-                                    });
-                                }, this));
-
-                            // PNG export - same as above but use the PNG URL method
-                            // instead.
-                            me.select("a.export-png")
-                                .on("click", exporter(this.pngURL(), title + ".png"));
-
-                            // Vega export - use the Vega URL method this time.
-                            me.select("a.export-vega")
-                                .on("click", exporter(this.vegaURL(), title + ".json"));
+                    // Attach some click handlers to deal with export
+                    // requests in various formats.
+                    //
+                    // SVG export - call the SVG URL method and download via
+                    // an anchor element and simulated click.
+                    title = this.model.get("title");
+                    me.select("a.export-svg")
+                        .on("click", _.bind(function () {
+                            this.svgURL(function (url) {
+                                exporter(url, title + ".svg")();
+                            });
                         }, this));
-                    }, this)
-                });
+
+                    // PNG export - same as above but use the PNG URL method
+                    // instead.
+                    me.select("a.export-png")
+                        .on("click", exporter(this.pngURL(), title + ".png"));
+
+                    // Vega export - use the Vega URL method this time.
+                    me.select("a.export-vega")
+                        .on("click", exporter(this.vegaURL(), title + ".json"));
+                }, this));
             }
         })
     };

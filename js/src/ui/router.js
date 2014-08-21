@@ -23,6 +23,8 @@
 
                 model = new app.model.VisFile({
                     id: itemId
+                }, {
+                    fetchVega: true
                 });
 
                 view = new app.view.Item({
