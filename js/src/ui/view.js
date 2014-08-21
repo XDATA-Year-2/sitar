@@ -111,43 +111,40 @@
                 // declaration, as needed to make the resulting file a
                 // standalone SVG file that can, e.g., be rendered directly in a
                 // web browser or other software.
+                var div,
+                    svg,
+                    xml = "<?xml version=\"1.0\" standalone=\"no\"?>",
+                    doctype = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
+                    xmlns = "http://www.w3.org/2000/svg",
+                    dataURL;
 
-                vg.parse.spec(this.model.get("vega"), function (chart) {
-                    var div,
-                        svg,
-                        xml = "<?xml version=\"1.0\" standalone=\"no\"?>",
-                        doctype = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
-                        xmlns = "http://www.w3.org/2000/svg",
-                        dataURL;
+                // Construct a div element.
+                div = document.createElement("div");
 
-                    // Construct a div element.
-                    div = document.createElement("div");
+                // Render the Vega spec to this
+                // free-floating div as an SVG
+                // visualization.
+                this.chart({
+                    renderer: "svg",
+                    el: div
+                }).update();
 
-                    // Render the Vega spec to this
-                    // free-floating div as an SVG
-                    // visualization.
-                    chart({
-                        renderer: "svg",
-                        el: div
-                    }).update();
+                // Extract the HTML for the SVG element.
+                svg = d3.select(div)
+                    .select("div")
+                    .select("svg");
 
-                    // Extract the HTML for the SVG element.
-                    svg = d3.select(div)
-                        .select("div")
-                        .select("svg");
+                // Put some SVG-XML specific attributes in
+                // the SVG element.
+                svg.attr("class", null)
+                    .attr("version", "1.1")
+                    .attr("xmlns", xmlns);
 
-                    // Put some SVG-XML specific attributes in
-                    // the SVG element.
-                    svg.attr("class", null)
-                        .attr("version", "1.1")
-                        .attr("xmlns", xmlns);
+                // Construct a data URL.
+                dataURL = URL.createObjectURL(new Blob([xml, doctype, svg.node().outerHTML], {type: "text/svg+xml"}));
 
-                    // Construct a data URL.
-                    dataURL = URL.createObjectURL(new Blob([xml, doctype, svg.node().outerHTML], {type: "text/svg+xml"}));
-
-                    // Invoke the callback with the URL.
-                    callback(dataURL);
-                });
+                // Invoke the callback with the URL.
+                callback(dataURL);
             },
 
             pngURL: function () {
@@ -195,13 +192,17 @@
                     var exporter,
                         title;
 
-                    // TODO: cache "chart" so that the vega spec doesn't
-                    // need to be rendered again in svgURL() above?
+                    // Cache the chart function for later use.
+                    this.chart = chart;
+
+                    // Render the vega spec to the canvas element.
                     chart({
                         el: me.select(".vis").node(),
                         renderer: "canvas"
                     }).update();
 
+                    // A function generator to download a data- or blob-encoded
+                    // URL.
                     exporter = function (url, savefile) {
                         return function () {
                             var a = document.createElement("a");
