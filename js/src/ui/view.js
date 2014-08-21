@@ -212,6 +212,59 @@
                         };
                     };
 
+                    // Attach a click handler to launch Lyra.
+                    me.select("button.edit")
+                        .on("click", _.bind(function () {
+                            var lyra,
+                                handler;
+
+                            lyra = window.open("/lyra", "_blank");
+                            lyra.onload = _.bind(function () {
+                                var msg = {
+                                    data: {
+                                        name: this.model.get("vega").data[0].name,
+                                        values: this.model.get("vega").data[0].values
+                                    }
+                                };
+
+                                if (this.timeline) {
+                                    msg.timeline = this.timeline;
+                                } else {
+                                    msg.spec = this.model.get("vega");
+                                }
+
+                                lyra.postMessage(msg, window.location.origin);
+                            }, this);
+
+                            handler = _.bind(function (evt) {
+                                var msg = evt.data,
+                                    source = evt.source;
+
+                                // Check to make sure it was the lyra window
+                                // that sent this message.
+                                if (source !== lyra) {
+                                    console.warn("suspicious message received");
+                                    console.warn(evt);
+                                    return;
+                                }
+
+                                // Ensure that the message reception was a
+                                // one-shot deal.
+                                window.removeEventListener("message", handler);
+
+                                // Set the incoming vega spec on the model.
+                                this.model.set({
+                                    vega: msg.spec
+                                });
+
+                                // Save the timeline object for future editing
+                                // usage in this session.
+                                this.timeline = msg.timeline;
+                            }, this);
+
+                            window.addEventListener("message", handler);
+                        }, this));
+
                     // Attach some click handlers to deal with export
                     // requests in various formats.
                     //
