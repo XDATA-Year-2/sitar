@@ -35,21 +35,19 @@ $(function () {
                 },
                 dataType: "json",
                 success: function (folders) {
-                    var visFolder;
-
                     if (folders.length === 0) {
                         throw new Error("fatal: no folder named 'visualizations' was found");
                     } else if (folders.length > 1) {
                         throw new Error("fatal: multiple folders named 'visualizations' were found");
                     }
 
-                    visFolder = folders[0];
+                    app.visFolder = folders[0];
 
                     $.ajax({
                         method: "GET",
                         url: app.girder + "/item",
                         data: {
-                            folderId: visFolder._id
+                            folderId: app.visFolder._id
                         },
                         dataType: "json",
                         success: function (vis) {

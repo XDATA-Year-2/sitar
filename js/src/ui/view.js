@@ -34,14 +34,33 @@
             },
 
             render: function () {
-                var row;
+                var row,
+                    html;
+
+                row = d3.select(this.el)
+                    .append("div")
+                    .classed("row", true);
+
+                html = app.templates.galleryItem({
+                    posterUrl: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTUiIGhlaWdodD0iMTE4Ij48cmVjdCB3aWR0aD0iMTU1IiBoZWlnaHQ9IjExOCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9Ijc3LjUiIHk9IjU5IiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjQ4cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+KzwvdGV4dD48L3N2Zz4K",
+                    title: "Create New Visualization",
+                    description: ""
+                });
+
+                row.append("div")
+                    .classed("col-md-2", true)
+                    .html(html)
+                    .select("a.thumbnail")
+                    .on("click", function () {
+                        app.router.navigate("item/create", {trigger: true});
+                    });
 
                 this.collection.each(function (visfile, i) {
                     var view,
                         div;
 
                     // Every five items, create a new row element.
-                    if (i % 5 === 0) {
+                    if (i + 1 % 5 === 0) {
                         row = d3.select(this.el)
                             .append("div")
                             .classed("row", true);
@@ -96,12 +115,36 @@
         }),
 
         Item: Backbone.View.extend({
+            events: {
+                "click button.edit": "edit",
+                "click a.export-svg": "exportSVG",
+                "click a.export-png": "exportPNG",
+                "click a.export-vega": "exportVega"
+            },
+
             initialize: function () {
                 if (!this.model) {
                     throw new Error("fatal: must specify a model");
                 }
 
-                this.model.on("change", this.render, this);
+                this.model.once("change:vega", function () {
+                    this.render();
+
+                    this.model.on("change:vega", function () {
+                        this.render();
+                        window.setTimeout(_.bind(function () {
+                            this.model.set("png", window.atob(this.pngB64()));
+                            this.model.save({
+                                success: _.bind(function () {
+                                    app.router.navigate("item/" + this.model.get("id"), {
+                                        trigger: false,
+                                        replace: true
+                                    });
+                                }, this)
+                            });
+                        }, this), 1000);
+                    }, this);
+                }, this);
             },
 
             svgURL: function (callback) {
@@ -146,6 +189,16 @@
                 callback(dataURL);
             },
 
+            pngB64: function () {
+                var canvas;
+
+                canvas = d3.select(this.el)
+                    .select("canvas")
+                    .node();
+
+                return canvas.toDataURL("image/png").split(",")[1];
+            },
+
             pngURL: function () {
                 var canvas,
                     png,
@@ -180,112 +233,102 @@
                 return URL.createObjectURL(new Blob([vegaText], {type: "application/json"}));
             },
 
+            edit: function () {
+                var lyra,
+                    handler;
+
+                lyra = window.open("/lyra", "_blank");
+                lyra.onload = _.bind(function () {
+                    var msg = {
+                        data: {
+                            name: this.model.get("vega").data[0].name,
+                            values: this.model.get("vega").data[0].values
+                        }
+                    };
+
+                    if (this.timeline) {
+                        msg.timeline = this.timeline;
+                    } else {
+                        msg.spec = this.model.get("vega");
+                    }
+
+                    lyra.postMessage(msg, window.location.origin);
+                }, this);
+
+                handler = _.bind(function (evt) {
+                    var msg = evt.data,
+                        source = evt.source;
+
+                    // Check to make sure it was the lyra window
+                    // that sent this message.
+                    if (source !== lyra) {
+                        console.warn("suspicious message received");
+                        console.warn(evt);
+                        return;
+                    }
+
+                    // Ensure that the message reception was a
+                    // one-shot deal.
+                    window.removeEventListener("message", handler);
+
+                    // Set the incoming vega spec on the model.
+                    this.model.set({
+                        vega: msg.spec
+                    });
+
+                    // Save the timeline object for future editing
+                    // usage in this session.
+                    this.timeline = msg.timeline;
+                }, this);
+
+                window.addEventListener("message", handler);
+            },
+
+            exportURL: function (url, savefile) {
+                var a = document.createElement("a");
+                a.setAttribute("download", savefile);
+                a.setAttribute("href", url);
+                a.click();
+            },
+
+            exportSVG: function () {
+                this.svgURL(_.bind(function (url) {
+                    this.exportURL(url, this.model.get("title") + ".svg");
+                }, this));
+            },
+
+            exportPNG: function () {
+                this.exportURL(this.pngURL(), this.model.get("title") + ".png");
+            },
+
+            exportVega: function () {
+                this.exportURL(this.vegaURL(), this.model.get("title") + ".json");
+            },
+
             render: function () {
-                var me = d3.select(this.el);
+                var me = d3.select(this.el),
+                    vega;
 
                 // Populate the div with the template text.
                 me.html(app.templates.item());
 
                 // Render the spec to the main canvas element.
-                vg.parse.spec(this.model.get("vega"), _.bind(function (chart) {
-                    var exporter,
-                        title;
+                vega = this.model.get("vega");
+                if (vega) {
+                    vg.parse.spec(vega, _.bind(function (chart) {
+                        // Cache the chart function for later use.
+                        this.chart = chart;
 
-                    // Cache the chart function for later use.
-                    this.chart = chart;
-
-                    // Render the vega spec to the canvas element.
-                    chart({
-                        el: me.select(".vis").node(),
-                        renderer: "canvas"
-                    }).update();
-
-                    // A function generator to download a data- or blob-encoded
-                    // URL.
-                    exporter = function (url, savefile) {
-                        return function () {
-                            var a = document.createElement("a");
-                            a.setAttribute("download", savefile);
-                            a.setAttribute("href", url);
-                            a.click();
-                        };
-                    };
-
-                    // Attach a click handler to launch Lyra.
-                    me.select("button.edit")
-                        .on("click", _.bind(function () {
-                            var lyra,
-                                handler;
-
-                            lyra = window.open("/lyra", "_blank");
-                            lyra.onload = _.bind(function () {
-                                var msg = {
-                                    data: {
-                                        name: this.model.get("vega").data[0].name,
-                                        values: this.model.get("vega").data[0].values
-                                    }
-                                };
-
-                                if (this.timeline) {
-                                    msg.timeline = this.timeline;
-                                } else {
-                                    msg.spec = this.model.get("vega");
-                                }
-
-                                lyra.postMessage(msg, window.location.origin);
-                            }, this);
-
-                            handler = _.bind(function (evt) {
-                                var msg = evt.data,
-                                    source = evt.source;
-
-                                // Check to make sure it was the lyra window
-                                // that sent this message.
-                                if (source !== lyra) {
-                                    console.warn("suspicious message received");
-                                    console.warn(evt);
-                                    return;
-                                }
-
-                                // Ensure that the message reception was a
-                                // one-shot deal.
-                                window.removeEventListener("message", handler);
-
-                                // Set the incoming vega spec on the model.
-                                this.model.set({
-                                    vega: msg.spec
-                                });
-
-                                // Save the timeline object for future editing
-                                // usage in this session.
-                                this.timeline = msg.timeline;
-                            }, this);
-
-                            window.addEventListener("message", handler);
-                        }, this));
-
-                    // Attach some click handlers to deal with export
-                    // requests in various formats.
-                    //
-                    // SVG export - call the SVG URL method and download via
-                    // an anchor element and simulated click.
-                    title = this.model.get("title");
-                    me.select("a.export-svg")
-                        .on("click", _.bind(function () {
-                            this.svgURL(function (url) {
-                                exporter(url, title + ".svg")();
-                            });
-                        }, this));
-
-                    // PNG export - same as above but use the PNG URL method
-                    // instead.
-                    me.select("a.export-png")
-                        .on("click", exporter(this.pngURL(), title + ".png"));
-
-                    // Vega export - use the Vega URL method this time.
-                    me.select("a.export-vega")
-                        .on("click", exporter(this.vegaURL(), title + ".json"));
-                }, this));
+                        // Render the vega spec to the canvas element.
+                        chart({
+                            el: me.select(".vis").node(),
+                            renderer: "canvas"
+                        }).update();
+                    }, this));
+                } else {
+                    me.select(".vis")
+                        .html("<em>No visualization created yet - use the edit button to the right!</em>");
+                }
             }
         })
     };

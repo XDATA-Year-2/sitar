@@ -8,6 +8,7 @@
         Router: Backbone.Router.extend({
             routes: {
                 "": "gallery",
+                "item/create": "create",
                 "item/:itemId": "item"
             },
 
@@ -33,6 +34,22 @@
                 model.fetch({
                     fetchVega: true
                 });
+            },
+
+            create: function () {
+                var view;
+
+                Backbone.$("#itemview")
+                    .empty();
+
+                app.radio.select("itemview");
+
+                view = new app.view.Item({
+                    el: "#itemview",
+                    model: new app.model.VisFile()
+                });
+
+                view.render();
             }
         })
     };
