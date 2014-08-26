@@ -200,18 +200,12 @@
             },
 
             pngURL: function () {
-                var canvas,
-                    png,
+                var png,
                     arrayBuf,
                     intArray;
 
-                // Grab the canvas element containing the painted visualization.
-                canvas = d3.select(this.el)
-                    .select("canvas")
-                    .node();
-
                 // Get the base64-encoded PNG data, and convert it to raw bytes.
-                png = window.atob(canvas.toDataURL("image/png").split(",")[1]);
+                png = window.atob(this.pngB64());
 
                 // Stuff the PNG data into an ArrayBuffer - this step is
                 // necessary to creating a Blob URL, which in turn is necessary
