@@ -12,4 +12,5 @@ window.app = window.app || {};
     // Containers for backbone objects.
     app.model = {};
     app.view = {};
+    app.collection = {};
 }(window.app));
