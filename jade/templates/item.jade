@@ -1,0 +1,20 @@
+include ../mixins/modal.jade
+
++modal("Upload data set", "Cancel", "Upload")(id="set-data")
+    p Specify file: #[input(type="text")]
+
+.container
+    .row
+        .col-md-8.vis.border
+        .col-md-4
+            .row
+                button(type="button" data-toggle="modal" data-target="#set-data").btn.btn-default Set data
+            .row
+                button(type="button").btn.btn-default.edit Edit
+            .row
+                .btn-group
+                    button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.export Export #[span.caret]
+                    ul(role="menu").dropdown-menu
+                        li #[a.virtual-link.export-png PNG]
+                        li #[a.virtual-link.export-svg SVG]
+                        li #[a.virtual-link.export-vega Vega]

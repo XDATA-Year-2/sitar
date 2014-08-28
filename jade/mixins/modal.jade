@@ -1,0 +1,17 @@
+mixin modal(title, cancel, accept)
+    .modal.fade()&attributes(attributes)
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    button(type="button" data-dismiss="modal").close
+                        span(aria-hidden="true") &times;
+                        span.sr-only Close
+                    if title
+                        h3.modal-title #{title}
+                .modal-body
+                    block
+                .modal-footer
+                    if cancel
+                        button(type="button" data-dismiss="modal").btn.btn-default= cancel
+                    if accept
+                        button(type="button").btn.btn-primary= accept
