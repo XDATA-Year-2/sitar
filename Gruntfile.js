@@ -95,7 +95,9 @@ module.exports = function (grunt) {
                                                  "js/src/RadioDisplay.js",
                                                  "js/src/model/VisFile.js",
                                                  "js/src/collection/collection.js",
-                                                 "js/src/view/view.js",
+                                                 "js/src/view/Gallery.js",
+                                                 "js/src/view/GalleryItem.js",
+                                                 "js/src/view/Item.js",
                                                  "js/src/router/router.js"]
                 }
             }
