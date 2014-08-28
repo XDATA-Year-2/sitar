@@ -13,4 +13,5 @@ window.app = window.app || {};
     app.model = {};
     app.view = {};
     app.collection = {};
+    app.router = {};
 }(window.app));

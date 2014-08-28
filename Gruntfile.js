@@ -98,7 +98,7 @@ module.exports = function (grunt) {
                                                  "js/src/view/Gallery.js",
                                                  "js/src/view/GalleryItem.js",
                                                  "js/src/view/Item.js",
-                                                 "js/src/router/router.js"]
+                                                 "js/src/router/Router.js"]
                 }
             }
         },
