@@ -93,10 +93,12 @@ module.exports = function (grunt) {
                                                  "build/jade/templates.js",
                                                  "js/src/preamble.js",
                                                  "js/src/RadioDisplay.js",
-                                                 "js/src/ui/model.js",
-                                                 "js/src/ui/collection.js",
-                                                 "js/src/ui/view.js",
-                                                 "js/src/ui/router.js"]
+                                                 "js/src/model/VisFile.js",
+                                                 "js/src/collection/VisFiles.js",
+                                                 "js/src/view/Gallery.js",
+                                                 "js/src/view/GalleryItem.js",
+                                                 "js/src/view/Item.js",
+                                                 "js/src/router/Router.js"]
                 }
             }
         },
