@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, _, d3, vg */
 
 (function (app) {
@@ -146,9 +146,7 @@
                 // Check to make sure it was the lyra window
                 // that sent this message.
                 if (source !== lyra) {
-                    console.warn("suspicious message received");
-                    console.warn(evt);
-                    return;
+                    throw new Error("suspicious message received: " + evt);
                 }
 
                 // Ensure that the message reception was a

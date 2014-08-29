@@ -1,4 +1,4 @@
-/* jshint browser: true, jquery: true, devel: true */
+/* jshint browser: true, jquery: true */
 /* global _, Backbone */
 
 $(function () {
