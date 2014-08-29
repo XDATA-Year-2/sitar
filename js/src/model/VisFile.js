@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, _ */
 
 (function (app) {

@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone */
 
 (function (app) {
@@ -25,7 +25,7 @@
                 id: itemId
             });
 
-            view = new app.view.Item({
+            app.roni = view = new app.view.Item({
                 el: "#itemview",
                 model: model
             });
