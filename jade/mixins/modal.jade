@@ -12,6 +12,6 @@ mixin modal(title, cancel, accept)
                     block
                 .modal-footer
                     if cancel
-                        button(type="button" data-dismiss="modal").btn.btn-default= cancel
+                        button(type="button" data-dismiss="modal").btn.btn-default.cancel= cancel
                     if accept
-                        button(type="button").btn.btn-primary= accept
+                        button(type="button").btn.btn-primary.accept= accept

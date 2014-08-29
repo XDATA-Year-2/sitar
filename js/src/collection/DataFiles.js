@@ -6,7 +6,7 @@
 
     // A simple collection that triggers the formation of VisFile models when
     // handed their Girder item ids.
-    app.collection.VisFiles = Backbone.Collection.extend({
-        model: app.model.VisFile
+    app.collection.DataFiles = Backbone.Collection.extend({
+        model: app.model.DataFile
     });
 }(window.app));

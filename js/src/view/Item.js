@@ -196,6 +196,68 @@
             // Populate the div with the template text.
             me.html(app.templates.item());
 
+            // Attach a handler to fill in the dataset menu whenever the dialog
+            // box is invoked.
+            Backbone.$("#set-data")
+                .on("show.bs.modal", function () {
+                    var select,
+                        view;
+
+                    select = d3.select(this)
+                        .select("select");
+
+                    select.selectAll("option")
+                        .remove();
+
+                    view = new app.view.DataMenu({
+                        collection: app.dataFiles,
+                        el: select.node()
+                    });
+                    view.render();
+                });
+
+            d3.select("#set-data")
+                .select("button.accept")
+                .on("click", _.bind(function () {
+                    var select,
+                        dataId;
+
+                    select = d3.select(this.el)
+                        .select("select")
+                        .node();
+
+                    Backbone.$("#set-data")
+                        .modal("hide");
+
+                    dataId = select.selectedOptions[0].getAttribute("data-id");
+
+                    app.dataFiles.get(dataId)
+                        .fetchContents({
+                            success: _.bind(function (model) {
+                                var name = model.get("name").split(".")[0],
+                                    vega = this.model.get("vega");
+
+                                // These operations will change the model's vega
+                                // spec property in-place, and therefore won't
+                                // cause the "change" events to be fired...
+                                vega.data[0] = {
+                                    name: name,
+                                    values: model.get("contents")
+                                };
+                                vega.data[1].source = name;
+
+                                // ...therefore we fire them ourselves.
+                                this.model.trigger("change");
+                                this.model.trigger("change:vega");
+                            }, this),
+
+                            error: function (_, response) {
+                                throw response;
+                            }
+                        });
+
+                }, this));
+
             // Render the spec to the main canvas element.
             vega = this.model.get("vega");
             if (vega) {
@@ -216,4 +278,3 @@
         }
     });
 }(window.app));
-
