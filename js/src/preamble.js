@@ -7,7 +7,7 @@ window.app = window.app || {};
     //
     // TODO: make this dependent on either configuration, or a utility in
     // Tangelo that tells what this path is.
-    app.girder = "/girder/api/v1";
+    app.girder = "/plugin/girder/girder/api/v1";
 
     // Containers for backbone objects.
     app.model = {};
