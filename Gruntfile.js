@@ -105,6 +105,13 @@ module.exports = function (grunt) {
                 }
             }
         },
+        untar: {
+            lyra: {
+                files: {
+                    "build/site": "src/ext/lyra.tar.gz"
+                }
+            }
+        },
         clean: ["build"]
     });
 
@@ -114,6 +121,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.loadNpmTasks("grunt-untar");
     grunt.loadNpmTasks("grunt-contrib-clean");
 
     // Default task.
@@ -121,5 +129,6 @@ module.exports = function (grunt) {
                                    "stylus",
                                    "jshint",
                                    "jscs",
-                                   "uglify"]);
+                                   "uglify",
+                                   "untar"]);
 };
