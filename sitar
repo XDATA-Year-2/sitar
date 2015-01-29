@@ -40,4 +40,4 @@ here=`dirname "${here}"`
 sitar="${here}/build/site"
 
 # Launch the application
-"${TANGELO}" --root "${sitar}" --host ${hostname} --port ${port}
+"${TANGELO}" --root "${sitar}" --host ${hostname} --port ${port} --plugin-config "${here}/tangelo-plugin.conf"
