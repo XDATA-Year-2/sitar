@@ -8,6 +8,7 @@
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-stylus": "^0.18.0",
     "grunt-contrib-uglify": "^0.5.1",
-    "grunt-jscs": "^0.6.2"
+    "grunt-jscs": "^0.6.2",
+    "grunt-untar": "0.0.1"
   }
 }

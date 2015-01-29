@@ -17,7 +17,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    "build/site/index.html": "jade/index.jade"
+                    "build/site/index.html": "src/jade/index.jade"
                 }
             },
             template: {
@@ -29,7 +29,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    "build/jade/templates.js": ["jade/templates/**/*.jade"]
+                    "build/jade/templates.js": ["src/jade/templates/**/*.jade"]
                 }
             }
         },
@@ -37,7 +37,7 @@ module.exports = function (grunt) {
             compile: {
                 options: {},
                 files: {
-                    "build/site/index.css": "styl/index.styl"
+                    "build/site/index.css": "src/styl/index.styl"
                 }
             }
         },
@@ -74,10 +74,10 @@ module.exports = function (grunt) {
                 // Environment options.
                 browser: true
             },
-            all: ["Gruntfile.js", "js/src/**/*.js"]
+            all: ["Gruntfile.js", "src/js/**/*.js"]
         },
         jscs: {
-            src: "js/src/**/*.js",
+            src: "src/js/**/*.js",
             options: {
                 validateIndentation: 4
             }
@@ -88,20 +88,27 @@ module.exports = function (grunt) {
                     sourceMap: true
                 },
                 files: {
-                    "build/site/js/index.min.js": ["js/src/index.js"],
-                    "build/site/js/lib.min.js": ["js/ext/jade-runtime.js",
+                    "build/site/js/index.min.js": ["src/js/index.js"],
+                    "build/site/js/lib.min.js": ["src/ext/js/jade-runtime.js",
                                                  "build/jade/templates.js",
-                                                 "js/src/preamble.js",
-                                                 "js/src/RadioDisplay.js",
-                                                 "js/src/model/DataFile.js",
-                                                 "js/src/model/VisFile.js",
-                                                 "js/src/collection/DataFiles.js",
-                                                 "js/src/collection/VisFiles.js",
-                                                 "js/src/view/DataMenu.js",
-                                                 "js/src/view/Gallery.js",
-                                                 "js/src/view/GalleryItem.js",
-                                                 "js/src/view/Item.js",
-                                                 "js/src/router/Router.js"]
+                                                 "src/js/preamble.js",
+                                                 "src/js/RadioDisplay.js",
+                                                 "src/js/model/DataFile.js",
+                                                 "src/js/model/VisFile.js",
+                                                 "src/js/collection/DataFiles.js",
+                                                 "src/js/collection/VisFiles.js",
+                                                 "src/js/view/DataMenu.js",
+                                                 "src/js/view/Gallery.js",
+                                                 "src/js/view/GalleryItem.js",
+                                                 "src/js/view/Item.js",
+                                                 "src/js/router/Router.js"]
+                }
+            }
+        },
+        untar: {
+            lyra: {
+                files: {
+                    "build/site": "src/ext/lyra.tar.gz"
                 }
             }
         },
@@ -114,6 +121,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.loadNpmTasks("grunt-untar");
     grunt.loadNpmTasks("grunt-contrib-clean");
 
     // Default task.
@@ -121,5 +129,6 @@ module.exports = function (grunt) {
                                    "stylus",
                                    "jshint",
                                    "jscs",
-                                   "uglify"]);
+                                   "uglify",
+                                   "untar"]);
 };
