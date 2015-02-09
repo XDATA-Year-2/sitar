@@ -1,14 +1,14 @@
 /* jshint browser: true, jquery: true */
 /* global _, d3 */
 
-// RadioDisplay - a class to manage a set of display elements, only one of which
-// should be shown at a time.  Generalizes the notion of radio buttons.
-
 (function (app) {
     "use strict";
 
     app.util = app.util || {};
 
+    // RadioDisplay - a class to manage a set of display elements, only one of
+    // which should be shown at a time.  Generalizes the notion of radio
+    // buttons.
     app.util.RadioDisplay = function (cfg) {
         var elts = {},
             selected = null,
