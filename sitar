@@ -10,7 +10,7 @@
 
 # Set TANGELO environment variable if unset.
 if [ -z "${TANGELO}" ]; then
-    TANGELO=`which tangelo`
+    TANGELO=`command -v tangelo`
     if [ -z "${TANGELO}" ]; then
         echo "error: tangelo not found on path (set TANGELO, or add tangelo to path)" >/dev/stderr
         exit 1
@@ -40,4 +40,4 @@ here=`dirname "${here}"`
 sitar="${here}/build/site"
 
 # Launch the application
-"${TANGELO}" --root "${sitar}" --host ${hostname} --port ${port} --plugin-config "${here}/tangelo-plugin.conf"
+"${TANGELO}" --root "${sitar}" --host ${hostname} --port ${port} --config "${here}/tangelo-config.yaml"
