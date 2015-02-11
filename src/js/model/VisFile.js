@@ -21,6 +21,8 @@
     // vega.json file.  Changes in this file mean that the save() action will
     // have an effect on the server.
     //
+    // 6. A data object currently associated with the visualization.
+    //
     // This information can be used to render a preview of the Vega spec within
     // the Gallery view, and also a more detailed view for an individual item,
     // which will also enable editing/saving/etc.
@@ -271,6 +273,16 @@
                     error(this, undefined, options);
                 }
             });
+        },
+
+        getData: function () {
+            if (this.get("data")) {
+                return this.get("data");
+            } else if (app.util.maybeGet(this.get("vega"), "data", 0)) {
+                return this.get("vega").data[0];
+            } else {
+                return undefined;
+            }
         }
     });
 }(window.app));
