@@ -29,24 +29,29 @@
     app.model.VisFile = Backbone.Model.extend({
         sync: function (method, model, options) {
             switch (method) {
-                case "create":
+                case "create": {
                     this.createHandler(options);
                     break;
+                }
 
-                case "read":
+                case "read": {
                     this.fetchHandler(options);
                     break;
+                }
 
-                case "update":
+                case "update": {
                     this.updateHandler(options);
                     break;
+                }
 
-                case "delete":
+                case "delete": {
                     this.deleteHandler(options);
                     break;
+                }
 
-                default:
+                default: {
                     throw new Error("illegal condition: sync method was '" + method + "'");
+                }
             }
         },
 
@@ -111,10 +116,10 @@
                 url: app.girder + "/file",
                 type: "POST",
                 data: {
-                    "parentType": "item",
-                    "parentId": this.get("id"),
-                    "name": filename,
-                    "size": data.length
+                    parentType: "item",
+                    parentId: this.get("id"),
+                    name: filename,
+                    size: data.length
                 },
                 success: uploadChunks
             });
