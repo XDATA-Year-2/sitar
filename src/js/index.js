@@ -70,6 +70,7 @@ $(function () {
                         remove: ["hidden"]
                     }
                 });
+                app.radio.addElement("welcome", "#welcome");
                 app.radio.addElement("gallery", "#gallery");
                 app.radio.addElement("itemview", "#itemview");
 

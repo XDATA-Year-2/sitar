@@ -6,9 +6,14 @@
 
     app.router.Router = Backbone.Router.extend({
         routes: {
-            "": "gallery",
+            "": "login",
+            gallery: "gallery",
             "item/create": "create",
             "item/:itemId": "item"
+        },
+
+        login: function () {
+            app.radio.select("welcome");
         },
 
         gallery: function () {
