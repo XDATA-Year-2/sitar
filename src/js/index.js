@@ -1,10 +1,43 @@
-/* jshint browser: true, jquery: true */
-/* global _, Backbone */
+/* jshint browser: true, jquery: true, devel: true */
+/* global _, Backbone, d3 */
 
 $(function () {
     "use strict";
 
     var app = window.app;
+
+    // Attach the login actions to the "log in" and "register" buttons.
+    d3.select("#login")
+        .on("click", function () {
+            var username,
+                password;
+
+            username = d3.select("#username")
+                .property("value");
+
+            password = d3.select("#password")
+                .property("value");
+
+            console.log("login");
+            console.log(username);
+            console.log(password);
+        });
+
+    d3.select("#register")
+        .on("click", function () {
+            var username,
+                password;
+
+            username = d3.select("#username")
+                .property("value");
+
+            password = d3.select("#password")
+                .property("value");
+
+            console.log("register");
+            console.log(username);
+            console.log(password);
+        });
 
     // Get a list of visualizations.
     $.ajax({
