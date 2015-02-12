@@ -130,7 +130,6 @@
                 if (this.model.isNew()) {
                     data = this.model.getData();
                     msg = {
-                        spec: app.util.newVegaSpec(data),
                         data: data
                     };
                 } else {
