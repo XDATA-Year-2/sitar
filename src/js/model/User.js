@@ -1,4 +1,4 @@
-/* jshint: browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, _ */
 
 (function (app) {
@@ -7,6 +7,8 @@
     // A model of a logged-in user.  Girder requests will be done on behalf of
     // this user by passing the login token with each request.
     app.model.User = Backbone.Model.extend({
+        idAttribute: "token",
+
         sync: function (method, model, options) {
             switch (method) {
                 case "create": {
@@ -14,7 +16,7 @@
                 }
 
                 case "read": {
-                    this.login(options);
+                    this.readHandler(options);
                     break;
                 }
 
@@ -34,7 +36,46 @@
         },
 
         parse: function (response) {
-            return _.extend(response, {id: response.user._id});
+            var hash = {};
+
+            console.log(response);
+
+            if (response) {
+                hash = {token: app.util.maybeGet(response, "authToken", "token") || response._id};
+            }
+
+            return hash;
+        },
+
+        readHandler: function (options) {
+            var success,
+                error,
+                token;
+
+            // Look for a token in the cookies.  If there is none, the user must
+            // log in.
+            token = app.util.getGirderTokenCookie();
+
+            options = options || {};
+
+            success = options.success || Backbone.$.noop;
+            error = options.error || Backbone.$.noop;
+
+            // If no username/password provided, see if the token in hand is the
+            // valid token.
+            if (token && _.isUndefined(options.username) && _.isUndefined(options.password)) {
+                Backbone.ajax({
+                    method: "GET",
+                    url: app.girder + "/token/current",
+                    headers: {
+                        "Girder-Token": token
+                    },
+                    success: success,
+                    error: error
+                });
+            } else {
+                return this.login(options);
+            }
         },
 
         login: function (options) {
@@ -42,7 +83,7 @@
                 error = options && options.error || Backbone.$.noop,
                 auth = "Basic " + window.btoa(options.username + ":" + options.password);
 
-            Backbone.ajax({
+            return Backbone.ajax({
                 method: "GET",
                 url: "/plugin/girder/girder/api/v1/user/authentication",
                 headers: {
@@ -61,12 +102,11 @@
                 method: "DELETE",
                 url: "/plugin/girder/girder/api/v1/user/authentication",
                 headers: {
-                    "Girder-Token": this.get("authToken").token
+                    "Girder-Token": this.get("token")
                 },
                 success: success,
                 error: error
             });
         }
     });
-
 }(window.app));

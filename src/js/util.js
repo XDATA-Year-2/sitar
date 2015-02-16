@@ -212,6 +212,22 @@
         };
     };
 
+    app.util.getGirderTokenCookie = function () {
+        var cookies = document.cookie.split("; ")
+            .map(function (s) {
+                return s.split("=");
+            })
+            .filter(function (c) {
+                return c[0] === "girderToken";
+            });
+
+        if (cookies.length === 0) {
+            return null;
+        } else {
+            return cookies[0][1];
+        }
+    };
+
     // A Maybe-monad style "get" operation that returns undefined if any of the
     // sequence of properties yields undefined, or the final value if none of
     // them do.

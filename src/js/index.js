@@ -6,6 +6,8 @@ $(function () {
 
     var app = window.app;
 
+    app.user = new app.model.User();
+
     // Attach the login actions to the "log in" and "register" buttons.
     d3.select("#login")
         .on("click", function () {
@@ -18,9 +20,21 @@ $(function () {
             password = d3.select("#password")
                 .property("value");
 
-            console.log("login");
-            console.log(username);
-            console.log(password);
+            // Attempt to log the user in if not already logged in.
+            if (app.user.isNew()) {
+                app.user.fetch({
+                    username: username,
+                    password: password,
+                    success: function () {
+                        app.router.navigate("gallery", {trigger: true});
+                    },
+                    error: function () {
+                        console.log("error!");
+                    }
+                });
+            } else {
+                app.router.navigate("gallery", {trigger: true});
+            }
         });
 
     d3.select("#register")
