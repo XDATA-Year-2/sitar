@@ -12,6 +12,8 @@
     app.util.RadioDisplay = function (cfg) {
         var elts = {},
             selected = null,
+            onSelect = $.noop,
+            onDeselect = $.noop,
             classes = {
                 add: [],
                 remove: []
@@ -30,6 +32,22 @@
             if (cfg.classes.remove) {
                 classes.remove = cfg.classes.remove.slice();
             }
+        }
+
+        if (cfg.onSelect) {
+            if (!_.isFunction(cfg.onSelect)) {
+                throw new Error("fatal: 'onSelect' must be a function");
+            }
+
+            onSelect = cfg.onSelect;
+        }
+
+        if (cfg.onDeselect) {
+            if (!_.isFunction(cfg.onDeselect)) {
+                throw new Error("fatal: 'onSelect' must be a function");
+            }
+
+            onDeselect = cfg.onDeselect;
         }
 
         return {
@@ -101,8 +119,9 @@
                         selected.elt.classed(c, true);
                     });
 
-                    // Deselect action.
+                    // Deselect actions.
                     selected.onDeselect.call(selected.elt.node());
+                    onDeselect.call(selected.elt.node());
                 }
             },
 
@@ -136,8 +155,9 @@
                     selected.elt.classed(c, false);
                 });
 
-                // Run the onSelect action.
-                selected.onSelect.call(selected.elt.node());
+                // Run the onSelect actions.
+                onSelect.call(selected.elt.node(), name);
+                selected.onSelect.call(selected.elt.node(), name);
             }
         };
     };
