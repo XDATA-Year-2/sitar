@@ -21,30 +21,37 @@
     // vega.json file.  Changes in this file mean that the save() action will
     // have an effect on the server.
     //
+    // 6. A data object currently associated with the visualization.
+    //
     // This information can be used to render a preview of the Vega spec within
     // the Gallery view, and also a more detailed view for an individual item,
     // which will also enable editing/saving/etc.
     app.model.VisFile = Backbone.Model.extend({
         sync: function (method, model, options) {
             switch (method) {
-                case "create":
+                case "create": {
                     this.createHandler(options);
                     break;
+                }
 
-                case "read":
+                case "read": {
                     this.fetchHandler(options);
                     break;
+                }
 
-                case "update":
+                case "update": {
                     this.updateHandler(options);
                     break;
+                }
 
-                case "delete":
+                case "delete": {
                     this.deleteHandler(options);
                     break;
+                }
 
-                default:
+                default: {
                     throw new Error("illegal condition: sync method was '" + method + "'");
+                }
             }
         },
 
@@ -109,10 +116,10 @@
                 url: app.girder + "/file",
                 type: "POST",
                 data: {
-                    "parentType": "item",
-                    "parentId": this.get("id"),
-                    "name": filename,
-                    "size": data.length
+                    parentType: "item",
+                    parentId: this.get("id"),
+                    name: filename,
+                    size: data.length
                 },
                 success: uploadChunks
             });
@@ -271,6 +278,16 @@
                     error(this, undefined, options);
                 }
             });
+        },
+
+        getData: function () {
+            if (this.get("data")) {
+                return this.get("data");
+            } else if (app.util.maybeGet(this.get("vega"), "data", 0)) {
+                return this.get("vega").data[0];
+            } else {
+                return undefined;
+            }
         }
     });
 }(window.app));

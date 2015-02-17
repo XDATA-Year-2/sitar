@@ -123,17 +123,27 @@
 
             lyra = window.open("/lyra", "_blank");
             lyra.onload = _.bind(function () {
-                var msg = {
-                    data: {
-                        name: this.model.get("vega").data[0].name,
-                        values: this.model.get("vega").data[0].values
-                    }
-                };
+                var msg,
+                    vega,
+                    data;
 
-                if (this.timeline) {
-                    msg.timeline = this.timeline;
+                if (this.model.isNew()) {
+                    data = this.model.getData();
+                    msg = {
+                        spec: app.util.newVegaSpec(data),
+                        data: data
+                    };
                 } else {
-                    msg.spec = this.model.get("vega");
+                    vega = this.model.get("vega");
+                    msg = {
+                        data: this.model.getData()
+                    };
+
+                    if (this.timeline) {
+                        msg.timeline = this.timeline;
+                    } else {
+                        msg.spec = vega;
+                    }
                 }
 
                 lyra.postMessage(msg, window.location.origin);
@@ -161,6 +171,9 @@
                 // Save the timeline object for future editing
                 // usage in this session.
                 this.timeline = msg.timeline;
+
+                // Save the model to the server.
+                this.model.save();
             }, this);
 
             window.addEventListener("message", handler);
@@ -232,28 +245,18 @@
                     app.dataFiles.get(dataId)
                         .fetchContents({
                             success: _.bind(function (model) {
-                                var name = model.get("name").split(".")[0],
-                                    vega = this.model.get("vega");
+                                var name = model.get("name").split(".")[0];
 
-                                // These operations will change the model's vega
-                                // spec property in-place, and therefore won't
-                                // cause the "change" events to be fired...
-                                vega.data[0] = {
+                                this.model.set("data", {
                                     name: name,
                                     values: model.get("contents")
-                                };
-                                vega.data[1].source = name;
-
-                                // ...therefore we fire them ourselves.
-                                this.model.trigger("change");
-                                this.model.trigger("change:vega");
+                                });
                             }, this),
 
                             error: function (_, response) {
                                 throw response;
                             }
                         });
-
                 }, this));
 
             // Render the spec to the main canvas element.

@@ -1,10 +1,65 @@
-/* jshint browser: true, jquery: true */
-/* global _, Backbone */
+/* jshint browser: true, jquery: true, devel: true */
+/* global _, Backbone, d3 */
 
 $(function () {
     "use strict";
 
     var app = window.app;
+
+    app.user = new app.model.User();
+
+    // Attach the login actions to the "log in" and "register" buttons.
+    d3.select("#login")
+        .on("click", function () {
+            var username,
+                password;
+
+            username = d3.select("#username")
+                .property("value");
+
+            password = d3.select("#password")
+                .property("value");
+
+            // Attempt to log the user in if not already logged in.
+            app.user.fetch({
+                username: username,
+                password: password,
+                success: function () {
+                    console.log("yep");
+                    var target = app.jumpback || "gallery";
+                    app.jumpback = null;
+
+                    d3.select("#jumpback")
+                        .classed("hidden", true);
+
+                    d3.select("#failure")
+                        .classed("hidden", true);
+
+                    app.router.navigate(target, {trigger: true});
+                },
+                error: function () {
+                    console.log("nope");
+                    d3.select("#failed")
+                        .classed("hidden", false);
+                }
+            });
+        });
+
+    d3.select("#register")
+        .on("click", function () {
+            var username,
+                password;
+
+            username = d3.select("#username")
+                .property("value");
+
+            password = d3.select("#password")
+                .property("value");
+
+            console.log("register");
+            console.log(username);
+            console.log(password);
+        });
 
     // Get a list of visualizations.
     $.ajax({
@@ -70,6 +125,7 @@ $(function () {
                         remove: ["hidden"]
                     }
                 });
+                app.radio.addElement("welcome", "#welcome");
                 app.radio.addElement("gallery", "#gallery");
                 app.radio.addElement("itemview", "#itemview");
 

@@ -1,14 +1,14 @@
 /* jshint browser: true, jquery: true */
 /* global _, d3 */
 
-// RadioDisplay - a class to manage a set of display elements, only one of which
-// should be shown at a time.  Generalizes the notion of radio buttons.
-
 (function (app) {
     "use strict";
 
     app.util = app.util || {};
 
+    // RadioDisplay - a class to manage a set of display elements, only one of
+    // which should be shown at a time.  Generalizes the notion of radio
+    // buttons.
     app.util.RadioDisplay = function (cfg) {
         var elts = {},
             selected = null,
@@ -140,5 +140,110 @@
                 selected.onSelect.call(selected.elt.node());
             }
         };
+    };
+
+    app.util.newVegaSpec = function (data) {
+        return {
+            width: 800,
+            height: 700,
+            padding: "auto",
+            data: [
+                {
+                    name: data.name,
+                    values: data.values,
+                    format: {
+                        type: "json"
+                    },
+                    "lyra.role": "data_source"
+                },
+                {
+                    name: "pipeline_0",
+                    "lyra.displayName": "Pipeline 1",
+                    source: data.name,
+                    transform: []
+                }
+            ],
+            scales: [],
+            marks: [{
+                properties: {
+                    enter: {
+                        x: {
+                            value: 0,
+                            default: 1
+                        },
+                        width: {
+                            value: 800,
+                            default: 1
+                        },
+                        y: {
+                            value: 0,
+                            default: 1
+                        },
+                        height: {
+                            value: 700,
+                            default: 1
+                        },
+                        clip: {
+                            value: 0
+                        },
+                        fill: {
+                            value: "#ffffff"
+                        },
+                        fillOpacity: {
+                            value: 0
+                        },
+                        stroke: {
+                            value: "#000000"
+                        },
+                        strokeWidth: {
+                            value: 0
+                        }
+                    }
+                },
+                scales: [],
+                axes: [],
+                marks: [],
+                name: "layer_0",
+                type: "group",
+                from: {},
+                "lyra.displayName": "Layer 1",
+                "lyra.groupType": "layer"
+            }]
+        };
+    };
+
+    app.util.getGirderTokenCookie = function () {
+        var cookies = document.cookie.split("; ")
+            .map(function (s) {
+                return s.split("=");
+            })
+            .filter(function (c) {
+                return c[0] === "girderToken";
+            });
+
+        if (cookies.length === 0) {
+            return null;
+        } else {
+            return cookies[0][1];
+        }
+    };
+
+    // A Maybe-monad style "get" operation that returns undefined if any of the
+    // sequence of properties yields undefined, or the final value if none of
+    // them do.
+    //
+    // e.g., for an object x = {"name": {"first": "Roni"} }, maybeGet(x, "name",
+    // "first") is "Roni", but maybeGet(x, "formal_name", "first") is undefined.
+    app.util.maybeGet = function () {
+        var val = arguments[0];
+        _.each(Array.prototype.slice.call(arguments, 1), function (field) {
+            if (_.isUndefined(val)) {
+                return undefined;
+            }
+
+            val = val[field];
+        });
+
+        return val;
     };
 }(window.app));
