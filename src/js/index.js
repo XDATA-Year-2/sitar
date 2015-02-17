@@ -117,6 +117,11 @@ $(function () {
                 app.radio = new app.util.RadioDisplay({
                     classes: {
                         remove: ["hidden"]
+                    },
+
+                    onSelect: function (name) {
+                        d3.select("#navbar")
+                            .classed("hidden", name === "welcome");
                     }
                 });
                 app.radio.addElement("welcome", "#welcome");
