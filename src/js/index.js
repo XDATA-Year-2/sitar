@@ -1,4 +1,4 @@
-/* jshint browser: true, jquery: true, devel: true */
+/* jshint browser: true, jquery: true */
 /* global _, Backbone, d3 */
 
 $(function () {
@@ -25,7 +25,6 @@ $(function () {
                 username: username,
                 password: password,
                 success: function () {
-                    console.log("yep");
                     var target = app.jumpback || "gallery";
                     app.jumpback = null;
 
@@ -38,7 +37,6 @@ $(function () {
                     app.router.navigate(target, {trigger: true});
                 },
                 error: function () {
-                    console.log("nope");
                     d3.select("#failed")
                         .classed("hidden", false);
                 }
@@ -55,10 +53,6 @@ $(function () {
 
             password = d3.select("#password")
                 .property("value");
-
-            console.log("register");
-            console.log(username);
-            console.log(password);
         });
 
     // Get a list of visualizations.
