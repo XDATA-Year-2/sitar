@@ -82,7 +82,13 @@
                     headers: {
                         "Girder-Token": token
                     },
-                    success: success,
+                    success: function (response) {
+                        if (response !== null) {
+                            success.apply(this, arguments);
+                        } else {
+                            error.apply(this, arguments);
+                        }
+                    },
                     error: error
                 });
             } else {

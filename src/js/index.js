@@ -8,7 +8,7 @@ $(function () {
 
     app.user = new app.model.User();
 
-    // Attach the login actions to the "log in" and "register" buttons.
+    // Attach login actions to the "log in" button.
     d3.select("#login")
         .on("click", function () {
             var username,
@@ -31,7 +31,7 @@ $(function () {
                     d3.select("#jumpback")
                         .classed("hidden", true);
 
-                    d3.select("#failure")
+                    d3.select("#failed")
                         .classed("hidden", true);
 
                     app.router.navigate(target, {trigger: true});
@@ -43,6 +43,7 @@ $(function () {
             });
         });
 
+    // Attach action to the "register" button.
     d3.select("#register")
         .on("click", function () {
             var username,
@@ -53,6 +54,21 @@ $(function () {
 
             password = d3.select("#password")
                 .property("value");
+        });
+
+    // Attach action to the "logout" dropdown item.
+    d3.select("#logout")
+        .on("click", function () {
+            app.user.destroy({
+                success: function () {
+                    app.jumpback = null;
+                    app.router.navigate("", {trigger: true});
+                },
+
+                error: function () {
+                    throw new Error("the impossible has happened");
+                }
+            });
         });
 
     // Get a list of visualizations.
