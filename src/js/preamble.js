@@ -12,6 +12,10 @@ window.app = window.app || {};
     // The logged in user.
     app.user = null;
 
+    // A save-state to return a user to if they try to go directly to a page
+    // while not logged in.
+    app.jumpback = null;
+
     // Containers for backbone objects.
     app.model = {};
     app.view = {};

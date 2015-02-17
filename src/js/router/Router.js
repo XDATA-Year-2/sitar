@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone */
+/* global Backbone, d3 */
 
 (function (app) {
     "use strict";
@@ -13,47 +13,90 @@
         },
 
         login: function () {
-            app.radio.select("welcome");
+            app.user.fetch({
+                success: function () {
+                    var target = app.jumpback || "gallery";
+                    app.jumpback = null;
+
+                    app.router.navigate(target, {trigger: true});
+                },
+
+                error: function () {
+                    app.radio.select("welcome");
+
+                    if (app.jumpback) {
+                        d3.select("#jumpback")
+                            .classed("hidden", false);
+                    }
+                }
+            });
         },
 
         gallery: function () {
-            app.radio.select("gallery");
+            app.user.fetch({
+                success: function () {
+                    app.radio.select("gallery");
+                },
+
+                error: function () {
+                    app.jumpback = "gallery";
+                    app.router.navigate("", {trigger: true});
+                }
+            });
         },
 
         item: function (itemId) {
-            var view,
-                model;
+            app.user.fetch({
+                success: function () {
+                    var view,
+                        model;
 
-            app.radio.select("itemview");
+                    app.radio.select("itemview");
 
-            model = new app.model.VisFile({
-                id: itemId
-            });
+                    model = new app.model.VisFile({
+                        id: itemId
+                    });
 
-            app.roni = view = new app.view.Item({
-                el: "#itemview",
-                model: model
-            });
+                    app.roni = view = new app.view.Item({
+                        el: "#itemview",
+                        model: model
+                    });
 
-            model.fetch({
-                fetchVega: true
+                    model.fetch({
+                        fetchVega: true
+                    });
+                },
+
+                error: function () {
+                    app.jumpback = "item/" + itemId;
+                    app.router.navigate("", {trigger: true});
+                }
             });
         },
 
         create: function () {
-            var view;
+            app.user.fetch({
+                success: function () {
+                    var view;
 
-            Backbone.$("#itemview")
-                .empty();
+                    Backbone.$("#itemview")
+                        .empty();
 
-            app.radio.select("itemview");
+                    app.radio.select("itemview");
 
-            view = new app.view.Item({
-                el: "#itemview",
-                model: new app.model.VisFile()
+                    view = new app.view.Item({
+                        el: "#itemview",
+                        model: new app.model.VisFile()
+                    });
+
+                    view.render();
+                },
+
+                error: function () {
+                    app.jumpback = "item/create";
+                    app.router.navigate("", {trigger: true});
+                }
             });
-
-            view.render();
         }
     });
 }(window.app));

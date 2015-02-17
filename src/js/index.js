@@ -21,20 +21,28 @@ $(function () {
                 .property("value");
 
             // Attempt to log the user in if not already logged in.
-            if (app.user.isNew()) {
-                app.user.fetch({
-                    username: username,
-                    password: password,
-                    success: function () {
-                        app.router.navigate("gallery", {trigger: true});
-                    },
-                    error: function () {
-                        console.log("error!");
-                    }
-                });
-            } else {
-                app.router.navigate("gallery", {trigger: true});
-            }
+            app.user.fetch({
+                username: username,
+                password: password,
+                success: function () {
+                    console.log("yep");
+                    var target = app.jumpback || "gallery";
+                    app.jumpback = null;
+
+                    d3.select("#jumpback")
+                        .classed("hidden", true);
+
+                    d3.select("#failure")
+                        .classed("hidden", true);
+
+                    app.router.navigate(target, {trigger: true});
+                },
+                error: function () {
+                    console.log("nope");
+                    d3.select("#failed")
+                        .classed("hidden", false);
+                }
+            });
         });
 
     d3.select("#register")

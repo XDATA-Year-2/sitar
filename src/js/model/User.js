@@ -1,5 +1,5 @@
 /* jshint browser: true, devel: true */
-/* global Backbone, _ */
+/* global Backbone */
 
 (function (app) {
     "use strict";
@@ -38,8 +38,6 @@
         parse: function (response) {
             var hash = {};
 
-            console.log(response);
-
             if (response) {
                 hash = {token: app.util.maybeGet(response, "authToken", "token") || response._id};
             }
@@ -50,7 +48,8 @@
         readHandler: function (options) {
             var success,
                 error,
-                token;
+                token,
+                auth;
 
             // Look for a token in the cookies.  If there is none, the user must
             // log in.
@@ -61,9 +60,22 @@
             success = options.success || Backbone.$.noop;
             error = options.error || Backbone.$.noop;
 
-            // If no username/password provided, see if the token in hand is the
-            // valid token.
-            if (token && _.isUndefined(options.username) && _.isUndefined(options.password)) {
+            // If there's a username/password, try to log in with that
+            // (overwriting whatever credentials were in place already);
+            // otherwise, see if there's a token available and try to validate
+            // it; finally, just fail.
+            if (options.username && options.password) {
+                auth = "Basic " + window.btoa(options.username + ":" + options.password);
+                Backbone.ajax({
+                    method: "GET",
+                    url: app.girder + "/user/authentication",
+                    headers: {
+                        Authorization: auth
+                    },
+                    success: success,
+                    error: error
+                });
+            } else if (token) {
                 Backbone.ajax({
                     method: "GET",
                     url: app.girder + "/token/current",
@@ -74,24 +86,8 @@
                     error: error
                 });
             } else {
-                return this.login(options);
+                error(null);
             }
-        },
-
-        login: function (options) {
-            var success = options && options.success || Backbone.$.noop,
-                error = options && options.error || Backbone.$.noop,
-                auth = "Basic " + window.btoa(options.username + ":" + options.password);
-
-            return Backbone.ajax({
-                method: "GET",
-                url: "/plugin/girder/girder/api/v1/user/authentication",
-                headers: {
-                    Authorization: auth
-                },
-                success: success,
-                error: error
-            });
         },
 
         logout: function (options) {
