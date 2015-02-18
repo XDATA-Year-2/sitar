@@ -266,4 +266,8 @@
 
         return val;
     };
+
+    app.util.formName = function (obj) {
+        return obj.firstName + " " + obj.lastName[0] + ".";
+    };
 }(window.app));

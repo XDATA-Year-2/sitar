@@ -37,17 +37,15 @@
 
         parse: function (response) {
             var hash = {},
-                firstName,
-                lastName;
+                userObj;
 
             if (response) {
                 hash = {token: app.util.maybeGet(response, "authToken", "token") || response._id};
-                firstName = app.util.maybeGet(response, "user", "firstName");
-                lastName = app.util.maybeGet(response, "user", "lastName");
+                userObj = response.user;
             }
 
-            if (firstName && lastName) {
-                hash.name = firstName + lastName[0] + ".";
+            if (userObj) {
+                hash.name = app.util.formName(userObj);
             }
 
             return hash;
@@ -99,7 +97,7 @@
                                     "Girder-Token": token
                                 },
                                 success: _.bind(function (response) {
-                                    this.set("name", response.firstName + " " + response.lastName[0] + ".");
+                                    this.set("name", app.util.formName(response));
                                 }, this)
                             });
 
