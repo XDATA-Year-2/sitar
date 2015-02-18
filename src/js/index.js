@@ -16,7 +16,7 @@ $(function () {
 
     // Attach login actions to the "log in" button.
     d3.select("#login")
-        .on("click", function () {
+        .on("submit", function () {
             var username,
                 password;
 
@@ -53,6 +53,8 @@ $(function () {
                         .classed("hidden", false);
                 }
             });
+
+            d3.event.preventDefault();
         });
 
     // Attach action to the "register" button.
