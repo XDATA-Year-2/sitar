@@ -40,6 +40,12 @@ $(function () {
                     d3.select("#failed")
                         .classed("hidden", true);
 
+                    d3.select("#username")
+                        .property("value", "");
+
+                    d3.select("#password")
+                        .property("value", "");
+
                     app.router.navigate(target, {trigger: true});
                 },
                 error: function () {
