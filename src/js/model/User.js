@@ -1,5 +1,5 @@
-/* jshint browser: true, devel: true */
-/* global Backbone */
+/* jshint browser: true */
+/* global Backbone, _ */
 
 (function (app) {
     "use strict";
@@ -36,10 +36,16 @@
         },
 
         parse: function (response) {
-            var hash = {};
+            var hash = {},
+                userObj;
 
             if (response) {
                 hash = {token: app.util.maybeGet(response, "authToken", "token") || response._id};
+                userObj = response.user;
+            }
+
+            if (userObj) {
+                hash.name = app.util.formName(userObj);
             }
 
             return hash;
@@ -82,7 +88,24 @@
                     headers: {
                         "Girder-Token": token
                     },
-                    success: success,
+                    success: _.bind(function (response) {
+                        if (response !== null) {
+                            Backbone.ajax({
+                                method: "GET",
+                                url: app.girder + "/user/me",
+                                headers: {
+                                    "Girder-Token": token
+                                },
+                                success: _.bind(function (response) {
+                                    this.set("name", app.util.formName(response));
+                                }, this)
+                            });
+
+                            success.apply(this, arguments);
+                        } else {
+                            error.apply(this, arguments);
+                        }
+                    }, this),
                     error: error
                 });
             } else {

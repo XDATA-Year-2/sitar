@@ -1,4 +1,4 @@
-/* jshint browser: true, jquery: true, devel: true */
+/* jshint browser: true, jquery: true */
 /* global _, Backbone, d3 */
 
 $(function () {
@@ -8,7 +8,13 @@ $(function () {
 
     app.user = new app.model.User();
 
-    // Attach the login actions to the "log in" and "register" buttons.
+    // Attach a name view to the navbar name slot.
+    app.name = new app.view.Name({
+        model: app.user,
+        el: "#name"
+    });
+
+    // Attach login actions to the "log in" button.
     d3.select("#login")
         .on("click", function () {
             var username,
@@ -25,26 +31,25 @@ $(function () {
                 username: username,
                 password: password,
                 success: function () {
-                    console.log("yep");
                     var target = app.jumpback || "gallery";
                     app.jumpback = null;
 
                     d3.select("#jumpback")
                         .classed("hidden", true);
 
-                    d3.select("#failure")
+                    d3.select("#failed")
                         .classed("hidden", true);
 
                     app.router.navigate(target, {trigger: true});
                 },
                 error: function () {
-                    console.log("nope");
                     d3.select("#failed")
                         .classed("hidden", false);
                 }
             });
         });
 
+    // Attach action to the "register" button.
     d3.select("#register")
         .on("click", function () {
             var username,
@@ -55,10 +60,21 @@ $(function () {
 
             password = d3.select("#password")
                 .property("value");
+        });
 
-            console.log("register");
-            console.log(username);
-            console.log(password);
+    // Attach action to the "logout" dropdown item.
+    d3.select("#logout")
+        .on("click", function () {
+            app.user.destroy({
+                success: function () {
+                    app.jumpback = null;
+                    app.router.navigate("", {trigger: true});
+                },
+
+                error: function () {
+                    throw new Error("the impossible has happened");
+                }
+            });
         });
 
     // Get a list of visualizations.
@@ -123,6 +139,11 @@ $(function () {
                 app.radio = new app.util.RadioDisplay({
                     classes: {
                         remove: ["hidden"]
+                    },
+
+                    onSelect: function (name) {
+                        d3.select("#navbar")
+                            .classed("hidden", name === "welcome");
                     }
                 });
                 app.radio.addElement("welcome", "#welcome");
