@@ -8,6 +8,12 @@ $(function () {
 
     app.user = new app.model.User();
 
+    // Attach a name view to the navbar name slot.
+    app.name = new app.view.Name({
+        model: app.user,
+        el: "#name"
+    });
+
     // Attach login actions to the "log in" button.
     d3.select("#login")
         .on("click", function () {
