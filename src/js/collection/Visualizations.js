@@ -21,7 +21,7 @@
         },
 
         parse: function (responses) {
-            var items = responses[1] || [];
+            var items = responses[2] || [];
             return _.map(items, function (item) {
                 return new this.model({
                     id: item._id
@@ -67,9 +67,30 @@
                     }
 
                     return Backbone.ajax({
+                        url: app.girder + "/folder",
+                        data: {
+                            parentType: "folder",
+                            parentId: sitar[0]._id,
+                            text: "visualizations"
+                        },
+                        headers: {
+                            "Girder-Token": user.get("token")
+                        }
+                    });
+                }
+            });
+
+            // Finally, open up the "visualizations" subdirectory.
+            actions.add({
+                deferred: function (visfolder) {
+                    if (visfolder.length === 0) {
+                        return;
+                    }
+
+                    return Backbone.ajax({
                         url: app.girder + "/item",
                         data: {
-                            folderId: sitar[0]._id
+                            folderId: visfolder[0]._id
                         },
                         headers: {
                             "Girder-Token": user.get("token")
