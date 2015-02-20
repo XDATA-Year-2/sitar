@@ -13,10 +13,8 @@
         },
 
         login: function () {
-            console.log("login");
             app.user.fetch({
                 success: function () {
-                    console.log("success");
                     var target = app.jumpback || "gallery";
                     app.jumpback = null;
 
@@ -24,7 +22,6 @@
                 },
 
                 error: function () {
-                    console.log("error");
                     app.radio.select("welcome");
 
                     if (app.jumpback) {
@@ -36,14 +33,12 @@
         },
 
         gallery: function () {
-            console.log("gallery");
             app.user.fetch({
                 success: function () {
                     app.radio.select("gallery");
                 },
 
                 error: function () {
-                    console.log("error2");
                     app.jumpback = "gallery";
                     app.router.navigate("", {trigger: true});
                 }

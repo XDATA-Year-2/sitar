@@ -36,8 +36,6 @@
         },
 
         parse: function (response) {
-            console.log(response);
-
             var user;
 
             if (response.length === 0) {
@@ -99,7 +97,6 @@
                     }),
 
                     process: function (response) {
-                        console.log(response);
                         return {
                             token: response.authToken.token,
                             user: response.user
@@ -107,7 +104,6 @@
                     }
                 });
             } else if (token) {
-                console.log("token");
                 fetcher.add({
                     deferred: Backbone.ajax({
                         method: "GET",
@@ -124,7 +120,6 @@
 
                 fetcher.add({
                     deferred: function (token) {
-                        console.log(token);
                         return !!token && Backbone.ajax({
                             method: "GET",
                             url: app.girder + "/user/me",
@@ -135,7 +130,6 @@
                     }
                 });
             } else {
-                console.log("nekot");
                 error(null);
                 fetcher = undefined;
             }

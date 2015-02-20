@@ -233,7 +233,7 @@
 
                 response = processFunc.apply(null, arguments);
                 if (response !== sentinel) {
-                    responses = responses.concat(response);
+                    responses = responses.concat([response]);
                 } else {
                     response = _.last(responses);
                 }
