@@ -1,11 +1,11 @@
-/* jshint browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, _ */
 
 (function (app) {
     "use strict";
 
-    app.collection.DataFiles = Backbone.Collection.extend({
-        model: app.model.DataFile,
+    app.collection.Visualizations = Backbone.Collection.extend({
+        model: app.model.VisFile,
 
         sync: function (method, collection, options) {
             switch (method) {
@@ -71,7 +71,7 @@
                         data: {
                             parentType: "folder",
                             parentId: sitar[0]._id,
-                            text: "data"
+                            text: "visualizations"
                         },
                         headers: {
                             "Girder-Token": user.get("token")
@@ -82,15 +82,15 @@
 
             // Finally, open up the "visualizations" subdirectory.
             actions.add({
-                deferred: function (datafolder) {
-                    if (datafolder.length === 0) {
+                deferred: function (visfolder) {
+                    if (visfolder.length === 0) {
                         return;
                     }
 
                     return Backbone.ajax({
                         url: app.girder + "/item",
                         data: {
-                            folderId: datafolder[0]._id
+                            folderId: visfolder[0]._id
                         },
                         headers: {
                             "Girder-Token": user.get("token")

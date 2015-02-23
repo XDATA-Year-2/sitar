@@ -98,6 +98,7 @@ module.exports = function (grunt) {
                                                  "src/js/model/VisFile.js",
                                                  "src/js/collection/DataFiles.js",
                                                  "src/js/collection/VisFiles.js",
+                                                 "src/js/collection/Visualizations.js",
                                                  "src/js/view/DataMenu.js",
                                                  "src/js/view/Gallery.js",
                                                  "src/js/view/GalleryItem.js",

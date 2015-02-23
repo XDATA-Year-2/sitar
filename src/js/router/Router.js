@@ -1,4 +1,4 @@
-/* jshint browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, d3 */
 
 (function (app) {

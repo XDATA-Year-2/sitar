@@ -201,7 +201,8 @@
 
         render: function () {
             var me = d3.select(this.el),
-                vega;
+                vega,
+                dataFiles = new app.collection.DataFiles();
 
             // Populate the div with the template text.
             me.html(app.templates.item());
@@ -219,11 +220,22 @@
                     select.selectAll("option")
                         .remove();
 
-                    view = new app.view.DataMenu({
-                        collection: app.dataFiles,
-                        el: select.node()
+                    dataFiles.fetch({
+                        user: app.user,
+
+                        success: function () {
+                            view = new app.view.DataMenu({
+                                collection: dataFiles,
+                                el: select.node()
+                            });
+
+                            _.each(dataFiles.models, function (m) {
+                                m.fetch({
+                                    success: _.after(dataFiles.models.length, _.bind(view.render, view))
+                                });
+                            });
+                        }
                     });
-                    view.render();
                 });
 
             d3.select("#set-data")
@@ -241,7 +253,7 @@
 
                     dataId = select.selectedOptions[0].getAttribute("data-id");
 
-                    app.dataFiles.get(dataId)
+                    dataFiles.get(dataId)
                         .fetchContents({
                             success: _.bind(function (model) {
                                 var name = model.get("name").split(".")[0];

@@ -1,4 +1,4 @@
-/* jshint browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, d3 */
 
 (function (app) {
@@ -32,9 +32,17 @@
             //this.collection.on("add remove reset change", this.render, this);
         },
 
+        clear: function () {
+            d3.select(this.el)
+                .selectAll("*")
+                .remove();
+        },
+
         render: function () {
             var row,
                 html;
+
+            this.clear();
 
             row = d3.select(this.el)
                 .append("div")

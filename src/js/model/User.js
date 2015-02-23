@@ -1,5 +1,5 @@
-/* jshint browser: true */
-/* global Backbone, _ */
+/* jshint browser: true, devel: true */
+/* global Backbone */
 
 (function (app) {
     "use strict";
@@ -36,25 +36,38 @@
         },
 
         parse: function (response) {
-            var hash = {},
-                userObj;
+            var user;
 
-            if (response) {
-                hash = {token: app.util.maybeGet(response, "authToken", "token") || response._id};
-                userObj = response.user;
+            if (response.length === 0) {
+                return;
+            } else if (response.length === 1) {
+                if (response[0]) {
+                    user = response[0].user;
+
+                    return {
+                        token: response[0].token,
+                        user: user,
+                        name: user.firstName + " " + user.lastName[0] + "."
+                    };
+                }
+            } else if (response.length === 2) {
+                user = response[1];
+
+                return {
+                    token: response[0],
+                    user: user,
+                    name: user.firstName + " " + user.lastName[0] + "."
+                };
+            } else {
+                throw new Error("response should not be longer than 2 elements", response);
             }
-
-            if (userObj) {
-                hash.name = app.util.formName(userObj);
-            }
-
-            return hash;
         },
 
         readHandler: function (options) {
             var success,
                 error,
                 token,
+                fetcher,
                 auth;
 
             // Look for a token in the cookies.  If there is none, the user must
@@ -66,51 +79,62 @@
             success = options.success || Backbone.$.noop;
             error = options.error || Backbone.$.noop;
 
+            fetcher = new app.util.MonadicDeferredChain();
+
             // If there's a username/password, try to log in with that
             // (overwriting whatever credentials were in place already);
             // otherwise, see if there's a token available and try to validate
             // it; finally, just fail.
             if (options.username && options.password) {
                 auth = "Basic " + window.btoa(options.username + ":" + options.password);
-                Backbone.ajax({
-                    method: "GET",
-                    url: app.girder + "/user/authentication",
-                    headers: {
-                        Authorization: auth
-                    },
-                    success: success,
-                    error: error
+                fetcher.add({
+                    deferred: Backbone.ajax({
+                        method: "GET",
+                        url: app.girder + "/user/authentication",
+                        headers: {
+                            Authorization: auth
+                        }
+                    }),
+
+                    process: function (response) {
+                        return {
+                            token: response.authToken.token,
+                            user: response.user
+                        };
+                    }
                 });
             } else if (token) {
-                Backbone.ajax({
-                    method: "GET",
-                    url: app.girder + "/token/current",
-                    headers: {
-                        "Girder-Token": token
-                    },
-                    success: _.bind(function (response) {
-                        if (response !== null) {
-                            Backbone.ajax({
-                                method: "GET",
-                                url: app.girder + "/user/me",
-                                headers: {
-                                    "Girder-Token": token
-                                },
-                                success: _.bind(function (response) {
-                                    this.set("name", app.util.formName(response));
-                                }, this)
-                            });
+                fetcher.add({
+                    deferred: Backbone.ajax({
+                        method: "GET",
+                        url: app.girder + "/token/current",
+                        headers: {
+                            "Girder-Token": token
+                        },
+                    }),
 
-                            success.apply(this, arguments);
-                        } else {
-                            error.apply(this, arguments);
-                        }
-                    }, this),
-                    error: error
+                    process: function (response) {
+                        return response && response._id || null;
+                    }
+                });
+
+                fetcher.add({
+                    deferred: function (token) {
+                        return !!token && Backbone.ajax({
+                            method: "GET",
+                            url: app.girder + "/user/me",
+                            headers: {
+                                "Girder-Token": token
+                            }
+                        });
+                    }
                 });
             } else {
                 error(null);
+                fetcher = undefined;
             }
+
+            return fetcher && fetcher.run(success, error);
         },
 
         logout: function (options) {
