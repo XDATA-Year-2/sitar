@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, d3 */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -18,9 +18,9 @@
                 .attr("data-id", function (d) {
                     return d;
                 })
-                .text(function (d) {
-                    return app.dataFiles.get(d).get("name");
-                });
+                .text(_.bind(function (d) {
+                    return this.collection.get(d).get("name");
+                }, this));
         }
     });
 

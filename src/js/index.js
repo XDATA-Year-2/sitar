@@ -97,8 +97,6 @@ $(function () {
     gallery.listenTo(vises, "sync", _.debounce(gallery.render, 500));
     gallery.listenTo(app.user, "destroy", gallery.clear);
 
-    app.dataFiles = new app.collection.DataFiles([]);
-
     app.radio = new app.util.RadioDisplay({
         classes: {
             remove: ["hidden"]
