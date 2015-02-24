@@ -224,14 +224,22 @@
                         user: app.user,
 
                         success: function () {
+                            var render;
+
                             view = new app.view.DataMenu({
                                 collection: dataFiles,
                                 el: select.node()
                             });
 
+                            render = _.after(dataFiles.models.length, _.bind(view.render, view));
+
                             _.each(dataFiles.models, function (m) {
+                                // (The success callback is wrapped with
+                                // _.after(), so the underlying function
+                                // (view.render()) won't be called until the
+                                // last model is fetched).
                                 m.fetch({
-                                    success: _.after(dataFiles.models.length, _.bind(view.render, view))
+                                    success: render
                                 });
                             });
                         }
