@@ -24,7 +24,7 @@
                 span.col-md-2
                     button(disabled).btn.btn-lg.btn-info.btn-block.register Register
 
-    .alert.alert-info.hidden#jumpback.
+    .alert.alert-info(class=jumpback ? "jumpback" : "")#jumpback.
         You must be logged in to visit that page.  Please log in and we will return you there.
 
     .alert.alert-danger.hidden#failed.

@@ -10,9 +10,13 @@
             "click button.register": "register"
         },
 
-        render: function () {
+        render: function (options) {
+            options = options || {};
+
             d3.select(this.el)
-                .html(app.templates.login());
+                .html(app.templates.login({
+                    jumpback: options.jumpback
+                }));
         },
 
         submit: function (evt) {
