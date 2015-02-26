@@ -24,10 +24,17 @@
                 error: function () {
                     app.radio.select("welcome");
 
-                    if (app.jumpback) {
-                        d3.select("#jumpback")
-                            .classed("hidden", false);
+                    if (app.loginview) {
+                        app.loginview.remove();
                     }
+
+                    app.loginview = new app.view.Login({
+                        el: d3.select("#welcome").append("div").node()
+                    });
+
+                    app.loginview.render({
+                        jumpback: app.jumpback
+                    });
                 }
             });
         },

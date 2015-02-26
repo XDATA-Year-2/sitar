@@ -85,7 +85,7 @@ $(function () {
             });
         });
 
-    var vises, gallery, login;
+    var vises, gallery;
 
     vises = new app.collection.Visualizations();
     vises.listenTo(app.user, "change:user", _.partial(vises.fetch, {user: app.user}));
@@ -96,11 +96,6 @@ $(function () {
     });
     gallery.listenTo(vises, "sync", _.debounce(gallery.render, 500));
     gallery.listenTo(app.user, "destroy", gallery.clear);
-
-    login = new app.view.Login({
-        el: "#welcome"
-    });
-    login.render();
 
     app.radio = new app.util.RadioDisplay({
         classes: {
