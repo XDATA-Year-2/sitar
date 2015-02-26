@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, d3 */
 
 (function (app) {
@@ -54,7 +54,8 @@
                     app.radio.select("itemview");
 
                     model = new app.model.VisFile({
-                        id: itemId
+                        id: itemId,
+                        user: app.user
                     });
 
                     app.roni = view = new app.view.Item({
@@ -86,7 +87,9 @@
 
                     view = new app.view.Item({
                         el: "#itemview",
-                        model: new app.model.VisFile()
+                        model: new app.model.VisFile({
+                            user: app.user
+                        })
                     });
 
                     view.render();

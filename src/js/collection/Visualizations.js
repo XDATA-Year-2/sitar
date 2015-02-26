@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, _ */
 
 (function (app) {
@@ -24,7 +24,8 @@
             var items = responses[2] || [];
             return _.map(items, function (item) {
                 return new this.model({
-                    id: item._id
+                    id: item._id,
+                    user: app.user
                 });
             }, this);
         },
@@ -86,6 +87,8 @@
                     if (visfolder.length === 0) {
                         return;
                     }
+
+                    app.visFolder = visfolder[0]._id;
 
                     return Backbone.ajax({
                         url: app.girder + "/item",

@@ -17,14 +17,15 @@
                 throw new Error("fatal: must specify a model");
             }
 
-            this.model.once("change:vega", function () {
-                this.render();
+            this.model.on("change:vega", this.render, this);
 
-                this.model.on("change:vega", function () {
-                    this.render();
-                    window.setTimeout(_.bind(function () {
+            this.on("edit_finished", function () {
+                this.render({
+                    success: _.bind(function () {
                         this.model.set("png", window.atob(this.pngB64()));
-                        this.model.save({
+                        this.model.save({}, {
+                            user: app.user,
+                            folderId: app.visFolder,
                             success: _.bind(function () {
                                 app.router.navigate("item/" + this.model.get("id"), {
                                     trigger: false,
@@ -32,8 +33,8 @@
                                 });
                             }, this)
                         });
-                    }, this), 1000);
-                }, this);
+                    }, this)
+                });
             }, this);
         },
 
@@ -171,8 +172,7 @@
                 // usage in this session.
                 this.timeline = msg.timeline;
 
-                // Save the model to the server.
-                this.model.save();
+                this.trigger("edit_finished");
             }, this);
 
             window.addEventListener("message", handler);
@@ -199,7 +199,7 @@
             this.exportURL(this.vegaURL(), this.model.get("title") + ".json");
         },
 
-        render: function () {
+        render: function (options) {
             var me = d3.select(this.el),
                 vega,
                 dataFiles = new app.collection.DataFiles();
@@ -290,6 +290,10 @@
                         el: me.select(".vis").node(),
                         renderer: "canvas"
                     }).update();
+
+                    if (options.success) {
+                        _.bind(options.success, this)();
+                    }
                 }, this));
             } else {
                 me.select(".vis")
