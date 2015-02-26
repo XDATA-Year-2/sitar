@@ -205,21 +205,23 @@
                 }
             }, this));
 
-            callback = function (json) {
-                results.push(json);
-                finalize();
+            callback = function (slot) {
+                return function (json) {
+                    results[slot] = json;
+                    finalize();
+                };
             };
 
             // To construct the model we need to make two GET requests - one for
             // the item attributes (name and description, for example), and one
             // for the files contained within (the poster image and the actual
             // vega spec).
-            _.each(urls, _.bind(function (url) {
+            _.each(urls, _.bind(function (url, i) {
                 this.girderRequest({
                     method: "GET",
                     url: url,
                     dataType: "json",
-                    success: callback,
+                    success: callback(i),
                     error: this.errorHandler(options)
                 });
             }, this));
