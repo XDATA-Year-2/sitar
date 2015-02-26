@@ -61,7 +61,14 @@
         },
 
         register: function () {
-            console.log("register");
+            var username,
+                password;
+
+            username = d3.select("#username")
+                .property("value");
+
+            password = d3.select("#password")
+                .property("value");
         }
     });
 }(window.app));

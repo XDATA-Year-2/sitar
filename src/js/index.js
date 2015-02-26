@@ -14,62 +14,6 @@ $(function () {
         el: "#name"
     });
 
-    // Attach login actions to the "log in" button.
-    d3.select("#login")
-        .on("submit", function () {
-            var username,
-                password;
-
-            username = d3.select("#username")
-                .property("value");
-
-            password = d3.select("#password")
-                .property("value");
-
-            // Attempt to log the user in if not already logged in.
-            app.user.fetch({
-                username: username,
-                password: password,
-                success: function () {
-                    var target = app.jumpback || "gallery";
-                    app.jumpback = null;
-
-                    d3.select("#jumpback")
-                        .classed("hidden", true);
-
-                    d3.select("#failed")
-                        .classed("hidden", true);
-
-                    d3.select("#username")
-                        .property("value", "");
-
-                    d3.select("#password")
-                        .property("value", "");
-
-                    app.router.navigate(target, {trigger: true});
-                },
-                error: function () {
-                    d3.select("#failed")
-                        .classed("hidden", false);
-                }
-            });
-
-            d3.event.preventDefault();
-        });
-
-    // Attach action to the "register" button.
-    d3.select("#register")
-        .on("click", function () {
-            var username,
-                password;
-
-            username = d3.select("#username")
-                .property("value");
-
-            password = d3.select("#password")
-                .property("value");
-        });
-
     // Attach action to the "logout" dropdown item.
     d3.select("#logout")
         .on("click", function () {
