@@ -17,7 +17,7 @@
                 throw new Error("fatal: must specify a model");
             }
 
-            this.model.on("change:vega", this.render, this);
+            this.listenTo(this.model, "change:vega", this.render);
 
             this.on("edit_finished", function () {
                 this.render({
@@ -123,10 +123,16 @@
                 handler;
 
             lyra = window.open("/lyra", "_blank");
+
             lyra.onload = _.bind(function () {
                 var msg,
                     vega,
                     data;
+
+                lyra.onunload = function () {
+                    // Ensure that the message reception was a one-shot deal.
+                    window.removeEventListener("message", handler);
+                };
 
                 if (this.model.isNew()) {
                     data = this.model.getData();
@@ -153,15 +159,11 @@
                 var msg = evt.data,
                     source = evt.source;
 
-                // Check to make sure it was the lyra window
-                // that sent this message.
+                // Check to make sure it was the lyra window that sent this
+                // message.
                 if (source !== lyra) {
                     throw new Error("suspicious message received: " + evt);
                 }
-
-                // Ensure that the message reception was a
-                // one-shot deal.
-                window.removeEventListener("message", handler);
 
                 // Set the incoming vega spec on the model.
                 this.model.set({

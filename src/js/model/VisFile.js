@@ -291,6 +291,7 @@
 
             callback = _.after(2, _.bind(function () {
                 if (successCount === 2) {
+                    this.trigger("edit");
                     _.bind(options.success || Backbone.$.noop, this)();
                 } else {
                     _.bin(options.error || Backbone.$.noop, this)();

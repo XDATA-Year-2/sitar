@@ -36,6 +36,9 @@
             app.user.fetch({
                 success: function () {
                     app.radio.select("gallery");
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
                 },
 
                 error: function () {
@@ -48,8 +51,7 @@
         item: function (itemId) {
             app.user.fetch({
                 success: function () {
-                    var view,
-                        model;
+                    var model;
 
                     app.radio.select("itemview");
 
@@ -58,8 +60,12 @@
                         user: app.user
                     });
 
-                    app.roni = view = new app.view.Item({
-                        el: "#itemview",
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
+
+                    app.curview = new app.view.Item({
+                        el: d3.select("#itemview").append("div").node(),
                         model: model
                     });
 
