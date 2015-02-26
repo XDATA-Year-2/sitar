@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, d3 */
 
 (function (app) {
@@ -36,6 +36,9 @@
             app.user.fetch({
                 success: function () {
                     app.radio.select("gallery");
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
                 },
 
                 error: function () {
@@ -48,17 +51,21 @@
         item: function (itemId) {
             app.user.fetch({
                 success: function () {
-                    var view,
-                        model;
+                    var model;
 
                     app.radio.select("itemview");
 
                     model = new app.model.VisFile({
-                        id: itemId
+                        id: itemId,
+                        user: app.user
                     });
 
-                    app.roni = view = new app.view.Item({
-                        el: "#itemview",
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
+
+                    app.curview = new app.view.Item({
+                        el: d3.select("#itemview").append("div").node(),
                         model: model
                     });
 
@@ -86,7 +93,9 @@
 
                     view = new app.view.Item({
                         el: "#itemview",
-                        model: new app.model.VisFile()
+                        model: new app.model.VisFile({
+                            user: app.user
+                        })
                     });
 
                     view.render();

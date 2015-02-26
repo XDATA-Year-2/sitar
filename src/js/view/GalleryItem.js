@@ -12,7 +12,7 @@
                 throw new Error("fatal: must supply 'model' property");
             }
 
-            this.model.on("change", this.render, this);
+            this.model.on("change edit", this.render, this);
             this.model.fetch();
         },
 
@@ -37,4 +37,3 @@
         }
     });
 }(window.app));
-

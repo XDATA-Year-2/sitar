@@ -17,14 +17,15 @@
                 throw new Error("fatal: must specify a model");
             }
 
-            this.model.once("change:vega", function () {
-                this.render();
+            this.listenTo(this.model, "change:vega", this.render);
 
-                this.model.on("change:vega", function () {
-                    this.render();
-                    window.setTimeout(_.bind(function () {
+            this.on("edit_finished", function () {
+                this.render({
+                    success: _.bind(function () {
                         this.model.set("png", window.atob(this.pngB64()));
-                        this.model.save({
+                        this.model.save({}, {
+                            user: app.user,
+                            folderId: app.visFolder,
                             success: _.bind(function () {
                                 app.router.navigate("item/" + this.model.get("id"), {
                                     trigger: false,
@@ -32,8 +33,8 @@
                                 });
                             }, this)
                         });
-                    }, this), 1000);
-                }, this);
+                    }, this)
+                });
             }, this);
         },
 
@@ -122,10 +123,16 @@
                 handler;
 
             lyra = window.open("/lyra", "_blank");
+
             lyra.onload = _.bind(function () {
                 var msg,
                     vega,
                     data;
+
+                lyra.onunload = function () {
+                    // Ensure that the message reception was a one-shot deal.
+                    window.removeEventListener("message", handler);
+                };
 
                 if (this.model.isNew()) {
                     data = this.model.getData();
@@ -152,15 +159,11 @@
                 var msg = evt.data,
                     source = evt.source;
 
-                // Check to make sure it was the lyra window
-                // that sent this message.
+                // Check to make sure it was the lyra window that sent this
+                // message.
                 if (source !== lyra) {
                     throw new Error("suspicious message received: " + evt);
                 }
-
-                // Ensure that the message reception was a
-                // one-shot deal.
-                window.removeEventListener("message", handler);
 
                 // Set the incoming vega spec on the model.
                 this.model.set({
@@ -171,8 +174,7 @@
                 // usage in this session.
                 this.timeline = msg.timeline;
 
-                // Save the model to the server.
-                this.model.save();
+                this.trigger("edit_finished");
             }, this);
 
             window.addEventListener("message", handler);
@@ -199,7 +201,7 @@
             this.exportURL(this.vegaURL(), this.model.get("title") + ".json");
         },
 
-        render: function () {
+        render: function (options) {
             var me = d3.select(this.el),
                 vega,
                 dataFiles = new app.collection.DataFiles();
@@ -224,14 +226,22 @@
                         user: app.user,
 
                         success: function () {
+                            var render;
+
                             view = new app.view.DataMenu({
                                 collection: dataFiles,
                                 el: select.node()
                             });
 
+                            render = _.after(dataFiles.models.length, _.bind(view.render, view));
+
                             _.each(dataFiles.models, function (m) {
+                                // (The success callback is wrapped with
+                                // _.after(), so the underlying function
+                                // (view.render()) won't be called until the
+                                // last model is fetched).
                                 m.fetch({
-                                    success: _.after(dataFiles.models.length, _.bind(view.render, view))
+                                    success: render
                                 });
                             });
                         }
@@ -282,6 +292,10 @@
                         el: me.select(".vis").node(),
                         renderer: "canvas"
                     }).update();
+
+                    if (options.success) {
+                        _.bind(options.success, this)();
+                    }
                 }, this));
             } else {
                 me.select(".vis")

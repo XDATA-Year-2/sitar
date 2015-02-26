@@ -27,6 +27,12 @@
     // the Gallery view, and also a more detailed view for an individual item,
     // which will also enable editing/saving/etc.
     app.model.VisFile = Backbone.Model.extend({
+        initialize: function () {
+            if (!this.get("user")) {
+                throw new Error("'user' property is required");
+            }
+        },
+
         sync: function (method, model, options) {
             switch (method) {
                 case "create": {
@@ -55,10 +61,19 @@
             }
         },
 
+        girderRequest: function (options) {
+            options.headers = _.extend(options.headers || {}, {
+                "Girder-Token": this.get("user").get("token")
+            });
+
+            return Backbone.ajax(options);
+        },
+
         upload: function (data, filename, options) {
             var uploadChunks,
                 blob,
                 nums,
+                options2,
                 bdata;
 
             options = options || {};
@@ -78,51 +93,59 @@
             blob = new window.Blob([bdata], {type: options.type});
 
             uploadChunks = _.bind(function (upload) {
-                var uploadChunk = _.bind(function (start, maxChunkSize) {
-                    var end,
-                        form;
+                var form;
 
-                    form = new window.FormData();
-                    form.append("offset", start);
-                    form.append("uploadId", upload._id);
-                    form.append("chunk", blob);
+                form = new window.FormData();
+                form.append("offset", 0);
+                form.append("uploadId", upload._id);
+                form.append("chunk", blob);
 
-                    Backbone.ajax({
-                        url: app.girder + "/file/chunk",
-                        type: "POST",
-                        data: form,
-                        contentType: false,
-                        processData: false,
-                        success: _.bind(function (upload) {
-                            if (end < data.length) {
-                                uploadChunk(end, maxChunkSize);
-                            } else {
-                                if (options.idField) {
-                                    this.set(options.idField, upload._id);
-                                }
+                this.girderRequest({
+                    url: app.girder + "/file/chunk",
+                    type: "POST",
+                    data: form,
+                    contentType: false,
+                    processData: false,
+                    success: _.bind(function () {
+                        if (options.idField) {
+                            this.set(options.idField, upload._id);
+                        }
 
-                                if (options.success) {
-                                    options.success(this, undefined, options);
-                                }
-                            }
-                        }, this)
-                    });
-                }, this);
-
-                uploadChunk(0, 64 * 1024 * 1024);
+                        if (options.success) {
+                            options.success();
+                        }
+                    }, this)
+                });
             }, this);
 
-            Backbone.ajax({
-                url: app.girder + "/file",
-                type: "POST",
-                data: {
-                    parentType: "item",
-                    parentId: this.get("id"),
-                    name: filename,
-                    size: data.length
-                },
-                success: uploadChunks
-            });
+            if (_.isString(filename)) {
+                options2 = {
+                    url: app.girder + "/file",
+                    type: "POST",
+                    data: {
+                        parentType: "item",
+                        parentId: this.get("id"),
+                        name: filename,
+                        size: data.length
+                    },
+                    success: function (upload) {
+                        uploadChunks(upload);
+                    }
+                };
+            } else {
+                options2 = {
+                    url: app.girder + "/file/" + filename.id + "/contents",
+                    type: "PUT",
+                    data: {
+                        size: data.length
+                    },
+                    success: function (upload) {
+                        uploadChunks(upload);
+                    }
+                };
+            }
+
+            this.girderRequest(options2);
         },
 
         errorHandler: function (options) {
@@ -163,7 +186,7 @@
                 // If requested, retrieve the Vega spec itself, then set the
                 // attributes; otherwise, just set the attributes.
                 if (options.fetchVega) {
-                    Backbone.ajax({
+                    this.girderRequest({
                         method: "GET",
                         url: app.girder + "/file/" + vegaFile._id + "/download",
                         dataType: "json",
@@ -182,35 +205,46 @@
                 }
             }, this));
 
-            callback = function (json) {
-                results.push(json);
-                finalize();
+            callback = function (slot) {
+                return function (json) {
+                    results[slot] = json;
+                    finalize();
+                };
             };
 
             // To construct the model we need to make two GET requests - one for
             // the item attributes (name and description, for example), and one
             // for the files contained within (the poster image and the actual
             // vega spec).
-            _.each(urls, _.bind(function (url) {
-                Backbone.ajax({
+            _.each(urls, _.bind(function (url, i) {
+                this.girderRequest({
                     method: "GET",
                     url: url,
                     dataType: "json",
-                    success: callback,
+                    success: callback(i),
                     error: this.errorHandler(options)
                 });
             }, this));
         },
 
         createHandler: function (options) {
+            options = options || {};
+
+            if (!options.folderId) {
+                throw new Error("'folderId' option required");
+            }
+
             // Create an item.
-            Backbone.ajax({
+            this.girderRequest({
                 method: "POST",
                 url: app.girder + "/item",
                 data: {
-                    folderId: app.visFolder._id,
-                    name: this.get("title"),
-                    description: this.get("description")
+                    folderId: options.folderId,
+                    name: this.get("title") || "new vis",
+                    description: this.get("description") || "new descriptionless vis!!"
+                },
+                headers: {
+                    "Girder-Token": this.get("user").get("token")
                 },
                 dataType: "json",
                 success: _.bind(function (item) {
@@ -251,16 +285,34 @@
         },
 
         updateHandler: function (options) {
-            // Currently, to "update" an item in Girder, you have to delete
-            // it and reupload with the same location, name, description,
-            // and new content.  This will cause the IDs in the model to
-            // change, so be sure to emit a signal to indicate that a
-            // refresh may be needed elsewhere.
-            this.deleteHandler({
-                success: _.bind(function () {
-                    this.createHandler(options);
-                }, this),
-                error: this.errorHandler(options)
+            var successCount = 0,
+                success,
+                callback;
+
+            callback = _.after(2, _.bind(function () {
+                if (successCount === 2) {
+                    this.trigger("edit");
+                    _.bind(options.success || Backbone.$.noop, this)();
+                } else {
+                    _.bin(options.error || Backbone.$.noop, this)();
+                }
+            }, this));
+
+            success = function () {
+                successCount += 1;
+                callback();
+            };
+
+            this.upload(JSON.stringify(this.get("vega"), null, 4), {id: this.get("vegaId")}, {
+                success: success,
+                error: callback
+            });
+
+            this.upload(this.get("png"), {id: this.get("posterId")}, {
+                success: success,
+                error: callback,
+                binary: true,
+                type: "application/octet-binary"
             });
         },
 
@@ -268,7 +320,7 @@
             var success = options && options.success || Backbone.$.noop,
                 error = options && options.error || Backbone.$.noop;
 
-            Backbone.ajax({
+            this.girderRequest({
                 method: "DELETE",
                 url: app.girder + "/item/" + this.get("id"),
                 success: function () {
