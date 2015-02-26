@@ -99,11 +99,7 @@ module.exports = function (grunt) {
                                                  "src/js/collection/DataFiles.js",
                                                  "src/js/collection/VisFiles.js",
                                                  "src/js/collection/Visualizations.js",
-                                                 "src/js/view/DataMenu.js",
-                                                 "src/js/view/Gallery.js",
-                                                 "src/js/view/GalleryItem.js",
-                                                 "src/js/view/Item.js",
-                                                 "src/js/view/Name.js",
+                                                 "src/js/view/*.js",
                                                  "src/js/router/Router.js"]
                 }
             }

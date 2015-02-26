@@ -36,44 +36,5 @@ html
 
         .container
             #welcome.hidden
-                .jumbotron
-                    h1 Sitar Visualization Gallery
-
-                    p.
-                      Explore your visualization powers and see what others have
-                      done.  Create, share, and collaborate at the click of your
-                      mouse.
-
-                    div
-                        form#login
-                            .row
-                                span.col-md-offset-4.col-md-4
-                                    label(for="username").sr-only
-                                    input(type="username" id="username" placeholder="Username/email address").form-control
-
-                            .row
-                                span.col-md-offset-4.col-md-4
-                                    label(for="password").sr-only
-                                    input(type="password" id="password" placeholder="Password").form-control
-
-                            .row
-                                span.col-md-offset-4.col-md-2
-                                    button(type="submit").btn.btn-lg.btn-info.btn-block Log in
-                                span.col-md-2
-                                    button(disabled)#register.btn.btn-lg.btn-info.btn-block Register
-
-                    .alert.alert-info.hidden#jumpback.
-                        You must be logged in to visit that page.  Please log in and we will return you there.
-
-                    .alert.alert-danger.hidden#failed.
-                        Username or password incorrect.
-
-                    p.footer.
-                         Powered by
-                         #[a(href="http://idl.cs.washington.edu/projects/lyra/") Lyra],
-                         #[a(href="http://tangelo.kitware.com") Tangelo],
-                         and #[a(href="https://github.com/girder/girder") Girder]
-
-
             #gallery.hidden
             #itemview.hidden
