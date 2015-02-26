@@ -314,7 +314,7 @@
                 success = success || $.noop;
                 error = error || $.noop;
 
-                return pipe.done(function () {
+                return pipe.always(function () {
                     if (previousError) {
                         error(responses);
                     } else {
