@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone */
+/* global Backbone, _ */
 
 (function (app) {
     "use strict";
@@ -147,7 +147,10 @@
                 headers: {
                     "Girder-Token": this.get("token")
                 },
-                success: success,
+                success: _.bind(function (r) {
+                    this.set("name", "");
+                    success(r);
+                }, this),
                 error: error
             });
         }

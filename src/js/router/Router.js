@@ -50,6 +50,7 @@
                         jumpback: this.jumpback
                     });
 
+                    app.navbar.hide();
                     this.replaceView(view);
                 }, this)
             });
@@ -67,6 +68,7 @@
                         el: d3.select("#content").append("div").node()
                     });
 
+                    app.navbar.show();
                     this.replaceView(view);
                 }, this),
 
@@ -89,6 +91,7 @@
                         })
                     });
 
+                    app.navbar.show();
                     this.replaceView(view);
                 }, this),
 
@@ -110,6 +113,7 @@
 
                     view.render();
 
+                    app.navbar.show();
                     this.replaceView(view);
                 }, this),
 

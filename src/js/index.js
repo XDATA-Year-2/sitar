@@ -1,33 +1,20 @@
 /* jshint browser: true, jquery: true */
-/* global Backbone, d3 */
+/* global Backbone */
 
 $(function () {
     "use strict";
 
     var app = window.app;
 
+    // The logged in user.
     app.user = new app.model.User();
 
-    // Attach a name view to the navbar name slot.
-    app.name = new app.view.Name({
+    // A view for the navbar.
+    app.navbar = new app.view.Navbar({
         model: app.user,
-        el: "#name"
+        el: "#navbar"
     });
-
-    // Attach action to the "logout" dropdown item.
-    d3.select("#logout")
-        .on("click", function () {
-            app.user.destroy({
-                success: function () {
-                    app.jumpback = null;
-                    app.router.navigate("", {trigger: true});
-                },
-
-                error: function () {
-                    throw new Error("the impossible has happened");
-                }
-            });
-        });
+    app.navbar.render();
 
     app.router = new app.router.Router();
     Backbone.history.start();

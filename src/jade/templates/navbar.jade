@@ -1,0 +1,12 @@
+nav.navbar.navbar-default
+    .container-fluid
+        .navbar-header
+            a.navbar-brand(href="#") Sitar
+        .collapse.navbar-collapse
+            ul.nav.navbar-nav.navbar-right
+                li.dropdown
+                    a.dropdown-toggle(data-toggle="dropdown" role="button" aria-expanded="false")
+                        | #[span #{name}] #[span.caret]
+                    ul.dropdown-menu(role="menu")
+                        li
+                            a(href="#").logout Logout
