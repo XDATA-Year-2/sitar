@@ -8,8 +8,8 @@
         routes: {
             "": "login",
             gallery: "gallery",
-            "item/create": "create",
-            "item/:itemId": "item"
+            "vis/new": "create",
+            "vis/:itemId": "item"
         },
 
         replaceView: function (view) {
@@ -96,7 +96,7 @@
                 }, this),
 
                 error: _.bind(function () {
-                    this.setjmp("item/" + itemId);
+                    this.setjmp("vis/" + itemId);
                 }, this)
             });
         },
@@ -118,7 +118,7 @@
                 }, this),
 
                 error: _.bind(function () {
-                    this.setjmp("item/create");
+                    this.setjmp("vis/new");
                 }, this)
             });
         }

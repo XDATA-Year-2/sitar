@@ -33,7 +33,7 @@
                             user: app.user,
                             folderId: app.visFolder,
                             success: _.bind(function () {
-                                app.router.navigate("item/" + this.model.get("id"), {
+                                app.router.navigate("vis/" + this.model.get("id"), {
                                     trigger: false,
                                     replace: true
                                 });
