@@ -34,7 +34,6 @@
                 username: username,
                 password: password,
                 success: function () {
-                    var target = app.jumpback || "gallery";
                     app.jumpback = null;
 
                     d3.select("#jumpback")
@@ -49,7 +48,7 @@
                     d3.select("#password")
                         .property("value", "");
 
-                    app.router.navigate(target, {trigger: true});
+                    app.router.longjmp("gallery");
                 },
                 error: function () {
                     d3.select("#failed")

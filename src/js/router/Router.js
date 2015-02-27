@@ -20,14 +20,26 @@
             app.curview = view;
         },
 
+        setjmp: function (target) {
+            this.jumpback = target;
+            this.navigate("", {
+                trigger: true
+            });
+        },
+
+        longjmp: function (fallback) {
+            var target = this.jumpback || fallback;
+            this.jumpback = null;
+            this.navigate(target, {
+                trigger: true
+            });
+        },
+
         login: function () {
             app.user.fetch({
-                success: function () {
-                    var target = app.jumpback || "gallery";
-                    app.jumpback = null;
-
-                    app.router.navigate(target, {trigger: true});
-                },
+                success: _.bind(function () {
+                    this.longjmp("gallery");
+                }, this),
 
                 error: _.bind(function () {
                     var view = new app.view.Login({
@@ -35,7 +47,7 @@
                     });
 
                     view.render({
-                        jumpback: app.jumpback
+                        jumpback: this.jumpback
                     });
 
                     this.replaceView(view);
@@ -58,10 +70,9 @@
                     this.replaceView(view);
                 }, this),
 
-                error: function () {
-                    app.jumpback = "gallery";
-                    app.router.navigate("", {trigger: true});
-                }
+                error: _.bind(function () {
+                    this.setjmp("gallery");
+                }, this)
             });
         },
 
@@ -81,10 +92,9 @@
                     this.replaceView(view);
                 }, this),
 
-                error: function () {
-                    app.jumpback = "item/" + itemId;
-                    app.router.navigate("", {trigger: true});
-                }
+                error: _.bind(function () {
+                    this.setjmp("item/" + itemId);
+                }, this)
             });
         },
 
@@ -103,10 +113,9 @@
                     this.replaceView(view);
                 }, this),
 
-                error: function () {
-                    app.jumpback = "item/create";
-                    app.router.navigate("", {trigger: true});
-                }
+                error: _.bind(function () {
+                    this.setjmp("item/create");
+                }, this)
             });
         }
     });
