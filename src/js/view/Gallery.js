@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, d3 */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -7,7 +7,7 @@
     // A preview gallery of the vis files in a VisFiles collection.  Made up of
     // GalleryItems, arranged in rows on the screen.
     app.view.Gallery = Backbone.View.extend({
-        initialize: function () {
+        initialize: function (options) {
             if (!this.collection) {
                 throw new Error("fatal: must specify 'collection'");
             }
@@ -16,33 +16,25 @@
                 throw new Error("fatal: must specify 'el'");
             }
 
+            if (!options.user) {
+                throw new Error("fatal: must specify 'user'");
+            }
+
             d3.select(this.el)
                 .classed("container", true);
 
             this.items = [];
 
-            // Trigger a render whenever the collection changes.
-            //
-            // TODO: this is harder than it seems.  Really we want to know
-            // if the *files* have changed on the server.  We may need to
-            // listen to a different set of models, or somehow detect when
-            // the title/description/poster have changed.  Commented out for
-            // now as it's not really effective as is.
-            //
-            //this.collection.on("add remove reset change", this.render, this);
-        },
+            this.listenTo(this.collection, "sync", _.debounce(this.render, 500));
 
-        clear: function () {
-            d3.select(this.el)
-                .selectAll("*")
-                .remove();
+            this.collection.fetch({
+                user: options.user
+            });
         },
 
         render: function () {
             var row,
                 html;
-
-            this.clear();
 
             row = d3.select(this.el)
                 .append("div")

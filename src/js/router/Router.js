@@ -1,5 +1,5 @@
 /* jshint browser: true, devel: true */
-/* global Backbone, _, d3 */
+/* global Backbone, d3 */
 
 (function (app) {
     "use strict";
@@ -42,18 +42,11 @@
         gallery: function () {
             app.user.fetch({
                 success: function () {
-                    var view,
-                        vises;
+                    var view;
 
-                    vises = new app.collection.Visualizations();
                     view = new app.view.Gallery({
-                        collection: vises,
-                        el: d3.select("#content").append("div").node()
-                    });
-                    view.listenTo(vises, "sync", _.debounce(view.render, 500));
-                    view.listenTo(app.user, "destroy", view.clear);
-
-                    vises.fetch({
+                        collection: new app.collection.Visualizations(),
+                        el: d3.select("#content").append("div").node(),
                         user: app.user
                     });
 
