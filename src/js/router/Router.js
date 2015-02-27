@@ -1,5 +1,5 @@
 /* jshint browser: true, devel: true */
-/* global Backbone, d3 */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -12,90 +12,114 @@
             "item/:itemId": "item"
         },
 
+        replaceView: function (view) {
+            if (app.curview) {
+                app.curview.remove();
+            }
+
+            app.curview = view;
+        },
+
+        setjmp: function (target) {
+            this.jumpback = target;
+            this.navigate("", {
+                trigger: true
+            });
+        },
+
+        longjmp: function (fallback) {
+            var target = this.jumpback || fallback;
+            this.jumpback = null;
+            this.navigate(target, {
+                trigger: true
+            });
+        },
+
         login: function () {
             app.user.fetch({
-                success: function () {
-                    var target = app.jumpback || "gallery";
-                    app.jumpback = null;
+                success: _.bind(function () {
+                    this.longjmp("gallery");
+                }, this),
 
-                    app.router.navigate(target, {trigger: true});
-                },
+                error: _.bind(function () {
+                    var view = new app.view.Login({
+                        el: d3.select("#content").append("div").node()
+                    });
 
-                error: function () {
-                    app.radio.select("welcome");
+                    view.render({
+                        jumpback: this.jumpback
+                    });
 
-                    if (app.jumpback) {
-                        d3.select("#jumpback")
-                            .classed("hidden", false);
-                    }
-                }
+                    app.navbar.hide();
+                    this.replaceView(view);
+                }, this)
             });
         },
 
         gallery: function () {
             app.user.fetch({
-                success: function () {
-                    app.radio.select("gallery");
-                },
+                success: _.bind(function () {
+                    var view;
 
-                error: function () {
-                    app.jumpback = "gallery";
-                    app.router.navigate("", {trigger: true});
-                }
+                    view = new app.view.Gallery({
+                        collection: new app.collection.Visualizations({
+                            user: app.user
+                        }),
+                        el: d3.select("#content").append("div").node()
+                    });
+
+                    app.navbar.show();
+                    this.replaceView(view);
+                }, this),
+
+                error: _.bind(function () {
+                    this.setjmp("gallery");
+                }, this)
             });
         },
 
         item: function (itemId) {
             app.user.fetch({
-                success: function () {
-                    var view,
-                        model;
+                success: _.bind(function () {
+                    var view;
 
-                    app.radio.select("itemview");
-
-                    model = new app.model.VisFile({
-                        id: itemId
+                    view = new app.view.Item({
+                        el: d3.select("#content").append("div").node(),
+                        model: new app.model.VisFile({
+                            id: itemId,
+                            user: app.user
+                        })
                     });
 
-                    app.roni = view = new app.view.Item({
-                        el: "#itemview",
-                        model: model
-                    });
+                    app.navbar.show();
+                    this.replaceView(view);
+                }, this),
 
-                    model.fetch({
-                        fetchVega: true
-                    });
-                },
-
-                error: function () {
-                    app.jumpback = "item/" + itemId;
-                    app.router.navigate("", {trigger: true});
-                }
+                error: _.bind(function () {
+                    this.setjmp("item/" + itemId);
+                }, this)
             });
         },
 
         create: function () {
             app.user.fetch({
-                success: function () {
-                    var view;
-
-                    Backbone.$("#itemview")
-                        .empty();
-
-                    app.radio.select("itemview");
-
-                    view = new app.view.Item({
-                        el: "#itemview",
-                        model: new app.model.VisFile()
+                success: _.bind(function () {
+                    var view = new app.view.Item({
+                        el: d3.select("#content").append("div").node(),
+                        model: new app.model.VisFile({
+                            user: app.user
+                        })
                     });
 
                     view.render();
-                },
 
-                error: function () {
-                    app.jumpback = "item/create";
-                    app.router.navigate("", {trigger: true});
-                }
+                    app.navbar.show();
+                    this.replaceView(view);
+                }, this),
+
+                error: _.bind(function () {
+                    this.setjmp("item/create");
+                }, this)
             });
         }
     });

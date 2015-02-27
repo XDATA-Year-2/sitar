@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, _ */
 
 (function (app) {
@@ -6,6 +6,16 @@
 
     app.collection.Visualizations = Backbone.Collection.extend({
         model: app.model.VisFile,
+
+        initialize: function (options) {
+            options = options || {};
+
+            if (!options.user) {
+                throw new Error("'user' option is required");
+            }
+
+            this.user = options.user;
+        },
 
         sync: function (method, collection, options) {
             switch (method) {
@@ -24,21 +34,16 @@
             var items = responses[2] || [];
             return _.map(items, function (item) {
                 return new this.model({
-                    id: item._id
+                    id: item._id,
+                    user: this.user
                 });
             }, this);
         },
 
         readHandler: function (options) {
-            var user,
-                actions;
+            var actions;
 
             options = options || {};
-
-            user = options.user;
-            if (!user) {
-                throw new Error("option 'user' required");
-            }
 
             // Start a new monadic callback chain.
             actions = new app.util.MonadicDeferredChain();
@@ -50,18 +55,18 @@
                     url: app.girder + "/folder",
                     data: {
                         parentType: "user",
-                        parentId: user.get("user")._id,
+                        parentId: this.user.get("user")._id,
                         text: "sitar"
                     },
                     headers: {
-                        "Girder-Token": user.get("token")
+                        "Girder-Token": this.user.get("token")
                     }
                 })
             });
 
             // Next, dive into the "sitar" folder (if it exists).
             actions.add({
-                deferred: function (sitar) {
+                deferred: _.bind(function (sitar) {
                     if (sitar.length === 0) {
                         return;
                     }
@@ -74,18 +79,20 @@
                             text: "visualizations"
                         },
                         headers: {
-                            "Girder-Token": user.get("token")
+                            "Girder-Token": this.user.get("token")
                         }
                     });
-                }
+                }, this)
             });
 
             // Finally, open up the "visualizations" subdirectory.
             actions.add({
-                deferred: function (visfolder) {
+                deferred: _.bind(function (visfolder) {
                     if (visfolder.length === 0) {
                         return;
                     }
+
+                    app.visFolder = visfolder[0]._id;
 
                     return Backbone.ajax({
                         url: app.girder + "/item",
@@ -93,10 +100,10 @@
                             folderId: visfolder[0]._id
                         },
                         headers: {
-                            "Girder-Token": user.get("token")
+                            "Girder-Token": this.user.get("token")
                         }
                     });
-                }
+                }, this)
             });
 
             return actions.run(options.success || Backbone.$.noop, options.error || Backbone.$.noop);

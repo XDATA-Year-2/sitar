@@ -1,5 +1,5 @@
-/* jshint browser: true, devel: true */
-/* global Backbone, d3 */
+/* jshint browser: true */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -21,28 +21,14 @@
 
             this.items = [];
 
-            // Trigger a render whenever the collection changes.
-            //
-            // TODO: this is harder than it seems.  Really we want to know
-            // if the *files* have changed on the server.  We may need to
-            // listen to a different set of models, or somehow detect when
-            // the title/description/poster have changed.  Commented out for
-            // now as it's not really effective as is.
-            //
-            //this.collection.on("add remove reset change", this.render, this);
-        },
+            this.listenTo(this.collection, "sync", _.debounce(this.render, 500));
 
-        clear: function () {
-            d3.select(this.el)
-                .selectAll("*")
-                .remove();
+            this.collection.fetch();
         },
 
         render: function () {
             var row,
                 html;
-
-            this.clear();
 
             row = d3.select(this.el)
                 .append("div")
