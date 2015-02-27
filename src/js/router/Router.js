@@ -1,5 +1,5 @@
 /* jshint browser: true, devel: true */
-/* global Backbone, d3 */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -12,6 +12,14 @@
             "item/:itemId": "item"
         },
 
+        replaceView: function (view) {
+            if (app.curview) {
+                app.curview.remove();
+            }
+
+            app.curview = view;
+        },
+
         login: function () {
             app.user.fetch({
                 success: function () {
@@ -21,7 +29,7 @@
                     app.router.navigate(target, {trigger: true});
                 },
 
-                error: function () {
+                error: _.bind(function () {
                     var view = new app.view.Login({
                         el: d3.select("#content").append("div").node()
                     });
@@ -30,18 +38,14 @@
                         jumpback: app.jumpback
                     });
 
-                    if (app.curview) {
-                        app.curview.remove();
-                    }
-
-                    app.curview = view;
-                }
+                    this.replaceView(view);
+                }, this)
             });
         },
 
         gallery: function () {
             app.user.fetch({
-                success: function () {
+                success: _.bind(function () {
                     var view;
 
                     view = new app.view.Gallery({
@@ -50,12 +54,8 @@
                         user: app.user
                     });
 
-                    if (app.curview) {
-                        app.curview.remove();
-                    }
-
-                    app.curview = view;
-                },
+                    this.replaceView(view);
+                }, this),
 
                 error: function () {
                     app.jumpback = "gallery";
@@ -66,7 +66,7 @@
 
         item: function (itemId) {
             app.user.fetch({
-                success: function () {
+                success: _.bind(function () {
                     var view,
                         model;
 
@@ -84,12 +84,8 @@
                         fetchVega: true
                     });
 
-                    if (app.curview) {
-                        app.curview.remove();
-                    }
-
-                    app.curview = view;
-                },
+                    this.replaceView(view);
+                }, this),
 
                 error: function () {
                     app.jumpback = "item/" + itemId;
@@ -100,7 +96,7 @@
 
         create: function () {
             app.user.fetch({
-                success: function () {
+                success: _.bind(function () {
                     var view = new app.view.Item({
                         el: d3.select("#content").append("div").node(),
                         model: new app.model.VisFile({
@@ -110,12 +106,8 @@
 
                     view.render();
 
-                    if (app.curview) {
-                        app.curview.remove();
-                    }
-
-                    app.curview = view;
-                },
+                    this.replaceView(view);
+                }, this),
 
                 error: function () {
                     app.jumpback = "item/create";
