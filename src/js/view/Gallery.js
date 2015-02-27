@@ -7,17 +7,13 @@
     // A preview gallery of the vis files in a VisFiles collection.  Made up of
     // GalleryItems, arranged in rows on the screen.
     app.view.Gallery = Backbone.View.extend({
-        initialize: function (options) {
+        initialize: function () {
             if (!this.collection) {
                 throw new Error("fatal: must specify 'collection'");
             }
 
             if (!this.el) {
                 throw new Error("fatal: must specify 'el'");
-            }
-
-            if (!options.user) {
-                throw new Error("fatal: must specify 'user'");
             }
 
             d3.select(this.el)
@@ -27,9 +23,7 @@
 
             this.listenTo(this.collection, "sync", _.debounce(this.render, 500));
 
-            this.collection.fetch({
-                user: options.user
-            });
+            this.collection.fetch();
         },
 
         render: function () {

@@ -49,9 +49,10 @@
                     var view;
 
                     view = new app.view.Gallery({
-                        collection: new app.collection.Visualizations(),
-                        el: d3.select("#content").append("div").node(),
-                        user: app.user
+                        collection: new app.collection.Visualizations({
+                            user: app.user
+                        }),
+                        el: d3.select("#content").append("div").node()
                     });
 
                     this.replaceView(view);
