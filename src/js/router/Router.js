@@ -67,21 +67,14 @@
         item: function (itemId) {
             app.user.fetch({
                 success: _.bind(function () {
-                    var view,
-                        model;
-
-                    model = new app.model.VisFile({
-                        id: itemId,
-                        user: app.user
-                    });
+                    var view;
 
                     view = new app.view.Item({
                         el: d3.select("#content").append("div").node(),
-                        model: model
-                    });
-
-                    model.fetch({
-                        fetchVega: true
+                        model: new app.model.VisFile({
+                            id: itemId,
+                            user: app.user
+                        })
                     });
 
                     this.replaceView(view);

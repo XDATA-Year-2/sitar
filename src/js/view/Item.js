@@ -19,6 +19,10 @@
 
             this.listenTo(this.model, "change:vega", this.render);
 
+            this.model.fetch({
+                fetchVega: true
+            });
+
             this.on("edit_finished", function () {
                 this.render({
                     success: _.bind(function () {
