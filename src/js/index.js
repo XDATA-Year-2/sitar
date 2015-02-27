@@ -1,5 +1,5 @@
 /* jshint browser: true, jquery: true */
-/* global _, Backbone, d3 */
+/* global Backbone, d3 */
 
 $(function () {
     "use strict";
@@ -28,18 +28,6 @@ $(function () {
                 }
             });
         });
-
-    var vises, gallery;
-
-    vises = new app.collection.Visualizations();
-    vises.listenTo(app.user, "change:user", _.partial(vises.fetch, {user: app.user}));
-
-    gallery = new app.view.Gallery({
-        collection: vises,
-        el: "#gallery"
-    });
-    gallery.listenTo(vises, "sync", _.debounce(gallery.render, 500));
-    gallery.listenTo(app.user, "destroy", gallery.clear);
 
     app.radio = new app.util.RadioDisplay({
         classes: {

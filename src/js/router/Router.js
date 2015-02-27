@@ -1,5 +1,5 @@
-/* jshint browser: true */
-/* global Backbone, d3 */
+/* jshint browser: true, devel: true */
+/* global Backbone, _, d3 */
 
 (function (app) {
     "use strict";
@@ -24,15 +24,15 @@
                 error: function () {
                     app.radio.select("welcome");
 
-                    if (app.loginview) {
-                        app.loginview.remove();
+                    if (app.curview) {
+                        app.curview.remove();
                     }
 
-                    app.loginview = new app.view.Login({
+                    app.curview = new app.view.Login({
                         el: d3.select("#welcome").append("div").node()
                     });
 
-                    app.loginview.render({
+                    app.curview.render({
                         jumpback: app.jumpback
                     });
                 }
@@ -42,10 +42,28 @@
         gallery: function () {
             app.user.fetch({
                 success: function () {
+                    var gallery,
+                        vises;
+
                     app.radio.select("gallery");
+
                     if (app.curview) {
                         app.curview.remove();
                     }
+
+                    vises = new app.collection.Visualizations();
+                    gallery = new app.view.Gallery({
+                        collection: vises,
+                        el: d3.select("#gallery").append("div").node()
+                    });
+                    gallery.listenTo(vises, "sync", _.debounce(gallery.render, 500));
+                    gallery.listenTo(app.user, "destroy", gallery.clear);
+
+                    vises.fetch({
+                        user: app.user
+                    });
+
+                    app.curview = gallery;
                 },
 
                 error: function () {
