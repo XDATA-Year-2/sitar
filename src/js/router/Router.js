@@ -22,19 +22,19 @@
                 },
 
                 error: function () {
-                    app.radio.select("welcome");
+                    var view = new app.view.Login({
+                        el: d3.select("#content").append("div").node()
+                    });
+
+                    view.render({
+                        jumpback: app.jumpback
+                    });
 
                     if (app.curview) {
                         app.curview.remove();
                     }
 
-                    app.curview = new app.view.Login({
-                        el: d3.select("#welcome").append("div").node()
-                    });
-
-                    app.curview.render({
-                        jumpback: app.jumpback
-                    });
+                    app.curview = view;
                 }
             });
         },
@@ -42,28 +42,26 @@
         gallery: function () {
             app.user.fetch({
                 success: function () {
-                    var gallery,
+                    var view,
                         vises;
 
-                    app.radio.select("gallery");
-
-                    if (app.curview) {
-                        app.curview.remove();
-                    }
-
                     vises = new app.collection.Visualizations();
-                    gallery = new app.view.Gallery({
+                    view = new app.view.Gallery({
                         collection: vises,
-                        el: d3.select("#gallery").append("div").node()
+                        el: d3.select("#content").append("div").node()
                     });
-                    gallery.listenTo(vises, "sync", _.debounce(gallery.render, 500));
-                    gallery.listenTo(app.user, "destroy", gallery.clear);
+                    view.listenTo(vises, "sync", _.debounce(view.render, 500));
+                    view.listenTo(app.user, "destroy", view.clear);
 
                     vises.fetch({
                         user: app.user
                     });
 
-                    app.curview = gallery;
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
+
+                    app.curview = view;
                 },
 
                 error: function () {
@@ -76,27 +74,28 @@
         item: function (itemId) {
             app.user.fetch({
                 success: function () {
-                    var model;
-
-                    app.radio.select("itemview");
+                    var view,
+                        model;
 
                     model = new app.model.VisFile({
                         id: itemId,
                         user: app.user
                     });
 
-                    if (app.curview) {
-                        app.curview.remove();
-                    }
-
-                    app.curview = new app.view.Item({
-                        el: d3.select("#itemview").append("div").node(),
+                    view = new app.view.Item({
+                        el: d3.select("#content").append("div").node(),
                         model: model
                     });
 
                     model.fetch({
                         fetchVega: true
                     });
+
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
+
+                    app.curview = view;
                 },
 
                 error: function () {
@@ -109,21 +108,20 @@
         create: function () {
             app.user.fetch({
                 success: function () {
-                    var view;
-
-                    Backbone.$("#itemview")
-                        .empty();
-
-                    app.radio.select("itemview");
-
-                    view = new app.view.Item({
-                        el: "#itemview",
+                    var view = new app.view.Item({
+                        el: d3.select("#content").append("div").node(),
                         model: new app.model.VisFile({
                             user: app.user
                         })
                     });
 
                     view.render();
+
+                    if (app.curview) {
+                        app.curview.remove();
+                    }
+
+                    app.curview = view;
                 },
 
                 error: function () {
