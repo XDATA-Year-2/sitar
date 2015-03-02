@@ -47,15 +47,22 @@
 
                         case 2: {
                             validateName();
+                            this.nextButton();
                             break;
                         }
 
                         case 3: {
                             this.enableNext();
+                            this.okButton();
                             break;
                         }
                     }
                 }, this));
+
+            this.$(".wizard")
+                .on("finished.fu.wizard", function () {
+                    console.log("finished");
+                });
 
             d3.select(this.el)
                 .select(".wizard")
@@ -111,5 +118,17 @@
                 .select(".btn-next")
                 .attr("disabled", true);
         },
+
+        okButton: function () {
+            d3.select(this.el)
+                .select(".btn-next")
+                .text("OK");
+        },
+
+        nextButton: function () {
+            d3.select(this.el)
+                .select(".btn-next")
+                .html("Next <span class=\"glyphicon glyphicon-arrow-right\"></span>");
+        }
     });
 }(window.app));

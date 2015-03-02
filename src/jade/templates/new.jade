@@ -10,7 +10,7 @@
             #[span.glyphicon.glyphicon-arrow-right] Next
     .step-content
         .step-pane.active.sample-pane(data-step="1")
-            h2 Select a data set to be bound initially to the new visualization
+            h2 Select a data set to bind to the new visualization
             select.dataset
 
         .step-pane.sample-pane(data-step="2")
@@ -24,4 +24,9 @@
                     textarea(placeholder="Description" rows="4").form-control.vis-description
 
         .step-pane.sample-pane(data-step="3")
-            p Step 3
+            h2 Edit the new visualization
+
+            p.
+                Click on "next" above to be launch
+                #[a(href="http://idl.cs.washington.edu/projects/lyra/") Lyra]
+                and edit your new visualization!
