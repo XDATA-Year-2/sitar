@@ -121,6 +121,18 @@
                     this.setjmp("vis/new");
                 }, this)
             });
+        },
+
+        showItem: function (visfile) {
+            var view = new app.view.Item({
+                el: d3.select("#content").append("div").node(),
+                model: visfile
+            });
+
+            view.render();
+
+            app.navbar.show();
+            this.replaceView(view);
         }
     });
 }(window.app));

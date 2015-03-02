@@ -60,9 +60,24 @@
                 }, this));
 
             this.$(".wizard")
-                .on("finished.fu.wizard", function () {
-                    console.log("finished");
-                });
+                .on("finished.fu.wizard", _.bind(function () {
+                    var me,
+                        select;
+
+                    me = d3.select(this.el);
+
+                    select = me.select("select")
+                        .node();
+
+                    this.model.set("title", me.select(".vis-name").property("value"));
+                    this.model.set("description", me.select(".vis-description").property("value"));
+
+                    this.model.setData(dataFiles.get(select.selectedOptions[0].getAttribute("data-id")), {
+                        success: _.bind(function () {
+                            app.router.showItem(this.model);
+                        }, this)
+                    });
+                }, this));
 
             d3.select(this.el)
                 .select(".wizard")
