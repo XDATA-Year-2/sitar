@@ -6,12 +6,66 @@
 
     app.view.NewVis = Backbone.View.extend({
         render: function () {
-            var dataFiles;
+            var dataFiles,
+                validateName,
+                validateNameDebounced;
 
             d3.select(this.el)
                 .html(app.templates.new());
 
             this.$(".wizard").wizard();
+
+            validateName = _.bind(function () {
+                var name,
+                    desc,
+                    me;
+
+                me = d3.select(this.el);
+
+                name = me.select(".vis-name")
+                    .property("value");
+
+                desc = me.select(".vis-description")
+                    .property("value");
+
+                if (name && desc) {
+                    this.enableNext();
+                } else {
+                    this.disableNext();
+                }
+            }, this);
+
+            validateNameDebounced = _.debounce(validateName, 150);
+
+            this.$(".wizard")
+                .on("changed.fu.wizard", _.bind(function (evt, data) {
+                    switch (data.step) {
+                        case 1: {
+                            this.enableNext();
+                            break;
+                        }
+
+                        case 2: {
+                            validateName();
+                            break;
+                        }
+
+                        case 3: {
+                            this.enableNext();
+                            break;
+                        }
+                    }
+                }, this));
+
+            d3.select(this.el)
+                .select(".wizard")
+                .select("input.vis-name")
+                .on("keyup", validateNameDebounced);
+
+            d3.select(this.el)
+                .select(".wizard")
+                .select("textarea.vis-description")
+                .on("keyup", validateNameDebounced);
 
             dataFiles = new app.collection.DataFiles();
             dataFiles.fetch({
@@ -44,6 +98,18 @@
                     });
                 }, this)
             });
-        }
+        },
+
+        enableNext: function () {
+            d3.select(this.el)
+                .select(".btn-next")
+                .attr("disabled", null);
+        },
+
+        disableNext: function () {
+            d3.select(this.el)
+                .select(".btn-next")
+                .attr("disabled", true);
+        },
     });
 }(window.app));

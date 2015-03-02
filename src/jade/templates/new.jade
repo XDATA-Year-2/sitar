@@ -10,9 +10,18 @@
             #[span.glyphicon.glyphicon-arrow-right] Next
     .step-content
         .step-pane.active.sample-pane(data-step="1")
-            p Select a data set to be bound initially to the new visualization
+            h2 Select a data set to be bound initially to the new visualization
             select.dataset
+
         .step-pane.sample-pane(data-step="2")
-            p Step 2
+            h2 Choose a name and description for the new visualization
+
+            .row
+                span.col-md-4
+                    input(type="text" placeholder="Name").form-control.vis-name
+            .row
+                span.col-md-4
+                    textarea(placeholder="Description" rows="4").form-control.vis-description
+
         .step-pane.sample-pane(data-step="3")
             p Step 3
