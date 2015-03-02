@@ -104,7 +104,7 @@
         create: function () {
             app.user.fetch({
                 success: _.bind(function () {
-                    var view = new app.view.Item({
+                    var view = new app.view.NewVis({
                         el: d3.select("#content").append("div").node(),
                         model: new app.model.VisFile({
                             user: app.user

@@ -1,0 +1,18 @@
+.wizard
+    ul.steps
+        li.active(data-step="1") Select Data #[span.chevron]
+        li(data-step="2") Choose a Name #[span.chevron]
+        li(data-step="3") Edit #[span.chevron]
+    .actions
+        button(type="button").btn.btn-default.btn-prev.
+            #[span.glyphicon.glyphicon-arrow-left] Prev
+        button(type="button").btn.btn-default.btn-next.
+            #[span.glyphicon.glyphicon-arrow-right] Next
+    .step-content
+        .step-pane.active.sample-pane(data-step="1")
+            p Select a data set to be bound initially to the new visualization
+            select.dataset
+        .step-pane.sample-pane(data-step="2")
+            p Step 2
+        .step-pane.sample-pane(data-step="3")
+            p Step 3
