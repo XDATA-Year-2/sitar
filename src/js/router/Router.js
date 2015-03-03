@@ -130,6 +130,11 @@
             });
 
             view.render();
+            if (!view.edit()) {
+                app.curview.trigger("popup-blocked");
+                view.remove();
+                return;
+            }
 
             app.navbar.show();
             this.replaceView(view);
