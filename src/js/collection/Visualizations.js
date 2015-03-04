@@ -15,6 +15,8 @@
             }
 
             this.user = options.user;
+
+            this.girderRequest = app.util.girderRequester(app.girder, this.user.get("token"));
         },
 
         sync: function (method, collection, options) {
@@ -51,15 +53,12 @@
             // First, query Girder for the user's file listing, looking for a
             // directory named "sitar".
             actions.add({
-                deferred: Backbone.ajax({
-                    url: app.girder + "/folder",
+                deferred: this.girderRequest({
+                    url: "/folder",
                     data: {
                         parentType: "user",
                         parentId: this.user.get("user")._id,
                         text: "sitar"
-                    },
-                    headers: {
-                        "Girder-Token": this.user.get("token")
                     }
                 })
             });
@@ -71,15 +70,12 @@
                         return;
                     }
 
-                    return Backbone.ajax({
-                        url: app.girder + "/folder",
+                    return this.girderRequest({
+                        url: "/folder",
                         data: {
                             parentType: "folder",
                             parentId: sitar[0]._id,
                             text: "visualizations"
-                        },
-                        headers: {
-                            "Girder-Token": this.user.get("token")
                         }
                     });
                 }, this)
@@ -94,13 +90,10 @@
 
                     app.visFolder = visfolder[0]._id;
 
-                    return Backbone.ajax({
-                        url: app.girder + "/item",
+                    return this.girderRequest({
+                        url: "/item",
                         data: {
                             folderId: visfolder[0]._id
-                        },
-                        headers: {
-                            "Girder-Token": this.user.get("token")
                         }
                     });
                 }, this)

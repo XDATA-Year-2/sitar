@@ -31,6 +31,8 @@
             if (!this.get("user")) {
                 throw new Error("'user' property is required");
             }
+
+            this.girderRequest = app.util.girderRequester(app.girder, this.get("user").get("token"));
         },
 
         sync: function (method, model, options) {
@@ -59,14 +61,6 @@
                     throw new Error("illegal condition: sync method was '" + method + "'");
                 }
             }
-        },
-
-        girderRequest: function (options) {
-            options.headers = _.extend(options.headers || {}, {
-                "Girder-Token": this.get("user").get("token")
-            });
-
-            return Backbone.ajax(options);
         },
 
         upload: function (data, filename, options) {
@@ -101,7 +95,7 @@
                 form.append("chunk", blob);
 
                 this.girderRequest({
-                    url: app.girder + "/file/chunk",
+                    url: "/file/chunk",
                     type: "POST",
                     data: form,
                     contentType: false,
@@ -120,7 +114,7 @@
 
             if (_.isString(filename)) {
                 options2 = {
-                    url: app.girder + "/file",
+                    url: "/file",
                     type: "POST",
                     data: {
                         parentType: "item",
@@ -134,7 +128,7 @@
                 };
             } else {
                 options2 = {
-                    url: app.girder + "/file/" + filename.id + "/contents",
+                    url: "/file/" + filename.id + "/contents",
                     type: "PUT",
                     data: {
                         size: data.length
@@ -156,7 +150,7 @@
         },
 
         fetchHandler: function (options) {
-            var baseUrl = app.girder + "/item/" + this.id,
+            var baseUrl = "/item/" + this.id,
                 urls = [baseUrl, baseUrl + "/files"],
                 results = [],
                 callback,
@@ -188,7 +182,7 @@
                 if (options.fetchVega) {
                     this.girderRequest({
                         method: "GET",
-                        url: app.girder + "/file/" + vegaFile._id + "/download",
+                        url: "/file/" + vegaFile._id + "/download",
                         dataType: "json",
                         success: _.bind(function (vega) {
                             attrib.vega = vega;
@@ -237,14 +231,11 @@
             // Create an item.
             this.girderRequest({
                 method: "POST",
-                url: app.girder + "/item",
+                url: "/item",
                 data: {
                     folderId: options.folderId,
                     name: this.get("title") || "new vis",
                     description: this.get("description") || "new descriptionless vis!!"
-                },
-                headers: {
-                    "Girder-Token": this.get("user").get("token")
                 },
                 dataType: "json",
                 success: _.bind(function (item) {
@@ -322,7 +313,7 @@
 
             this.girderRequest({
                 method: "DELETE",
-                url: app.girder + "/item/" + this.get("id"),
+                url: "/item/" + this.get("id"),
                 success: function () {
                     success(this, undefined, options);
                 },

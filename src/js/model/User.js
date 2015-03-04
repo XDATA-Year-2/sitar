@@ -88,13 +88,12 @@
                     }
                 });
             } else if (token) {
+                this.girderRequest = app.util.girderRequester(app.girder, token);
+
                 fetcher.add({
-                    deferred: Backbone.ajax({
+                    deferred: this.girderRequest({
                         method: "GET",
-                        url: app.girder + "/token/current",
-                        headers: {
-                            "Girder-Token": token
-                        }
+                        url: "/token/current"
                     }),
 
                     process: _.bind(function (response) {
@@ -108,9 +107,7 @@
 
                 fetcher.add({
                     deferred: _.bind(function () {
-                        if (this.attribs.token) {
-                            this.girderRequest = app.util.girderRequester(app.girder, this.attribs.token);
-
+                        if (this.girderRequest) {
                             return this.girderRequest({
                                 url: "/user/me"
                             });
@@ -191,12 +188,9 @@
             var success = options && options.success || Backbone.$.noop,
                 error = options && options.error || Backbone.$.noop;
 
-            Backbone.ajax({
+            this.girderRequest({
                 method: "DELETE",
-                url: "/plugin/girder/girder/api/v1/user/authentication",
-                headers: {
-                    "Girder-Token": this.get("token")
-                },
+                url: "/user/authentication",
                 success: _.bind(function (r) {
                     this.set("name", "");
                     success(r);
