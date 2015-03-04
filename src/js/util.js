@@ -1,5 +1,5 @@
 /* jshint browser: true, jquery: true */
-/* global _ */
+/* global Backbone, _ */
 
 (function (app) {
     "use strict";
@@ -167,6 +167,20 @@
                     }
                 });
             }
+        };
+    };
+
+    app.util.girderRequester = function (root, token) {
+        return function (options) {
+            options.headers = _.extend(options.headers || {}, {
+                "Girder-Token": token
+            });
+
+            if (options.url) {
+                options.url = root + options.url;
+            }
+
+            return Backbone.ajax(options);
         };
     };
 }(window.app));
