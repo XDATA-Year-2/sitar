@@ -76,20 +76,4 @@
 
     app.collection.Visualizations = extendFiles(app.model.VisFile, "visFolder");
     app.collection.DataFiles = extendFiles(app.model.DataFile, "dataFolder");
-
-    app.collection.Visualizations3 = app.collection.Files.extend({
-        model: app.model.VisFile,
-
-        initialize: function (options) {
-            options = options || {};
-
-            if (!options.user) {
-                throw new Error("'user' option is required");
-            }
-
-            options.folderId = options.user.get("visFolder");
-
-            app.collection.Files.prototype.initialize.call(this, options);
-        }
-    });
 }(window.app));
