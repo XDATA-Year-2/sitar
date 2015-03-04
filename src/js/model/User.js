@@ -9,10 +9,6 @@
     app.model.User = Backbone.Model.extend({
         idAttribute: "token",
 
-        initialize: function () {
-            this.attribs = {};
-        },
-
         sync: function (method, model, options) {
             switch (method) {
                 case "create": {
@@ -62,6 +58,8 @@
             error = options.error || Backbone.$.noop;
 
             fetcher = new app.util.MonadicDeferredChain();
+
+            this.attribs = {};
 
             // If there's a username/password, try to log in with that
             // (overwriting whatever credentials were in place already);
