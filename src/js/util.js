@@ -86,6 +86,7 @@
                     next = _.bind(next, myself)(response, responses);
                     if (_.isArray(next)) {
                         processFunc = whenProcessor(process);
+                        next = $.when.apply(null, next);
                     } else if (next === false) {
                         previousError = true;
                         next = undefined;
