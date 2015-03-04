@@ -215,7 +215,9 @@
         render: function (options) {
             var me = d3.select(this.el),
                 vega,
-                dataFiles = new app.collection.DataFiles();
+                dataFiles = new app.collection.DataFiles({
+                    user: app.user
+                });
 
             // Populate the div with the template text.
             me.html(app.templates.item());

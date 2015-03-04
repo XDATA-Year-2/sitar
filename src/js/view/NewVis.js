@@ -97,10 +97,11 @@
                 .select("textarea.vis-description")
                 .on("keyup", validateNameDebounced);
 
-            dataFiles = new app.collection.DataFiles();
-            dataFiles.fetch({
-                user: app.user,
+            dataFiles = new app.collection.DataFiles({
+                user: app.user
+            });
 
+            dataFiles.fetch({
                 success: _.bind(function () {
                     var render,
                         view,
