@@ -38,7 +38,9 @@
         parse: function () {
             var attribs = this.attribs;
             delete this.attribs;
-            return attribs;
+            return _.extend(attribs, {
+                name: app.util.formName(attribs.user)
+            });
         },
 
         readHandler: function (options) {
@@ -76,14 +78,16 @@
                         }
                     }),
 
-                    process: function (response) {
+                    process: _.bind(function (response) {
                         _.extend(this.attribs, {
                             token: response.authToken.token,
                             user: response.user
                         });
 
+                        this.girderRequest = app.util.girderRequester(app.girder, token);
+
                         return response;
-                    }
+                    }, this)
                 });
             } else if (token) {
                 this.girderRequest = app.util.girderRequester(app.girder, token);
@@ -95,9 +99,13 @@
                     }),
 
                     process: _.bind(function (response) {
-                        _.extend(this.attribs, {
-                            token: response && response._id || null
-                        });
+                        if (!response) {
+                            delete this.girderRequest;
+                        } else {
+                            _.extend(this.attribs, {
+                                token: response && response._id || null
+                            });
+                        }
 
                         return response;
                     }, this)
