@@ -46,13 +46,14 @@
     };
 
     app.util.MonadicDeferredChain = function () {
-        var myself = this,
-            base = $.Deferred(),
+        var base = $.Deferred(),
             pipe = base,
             sentinel = _.times(128, function () {
                 return _.sample("0123456789abcdef");
             }).join(""),
-            identity = function (x) { return x; },
+            identity = function (x) {
+                return x;
+            },
             processFunc = identity,
             errorFunc = $.noop,
             errorInvoker,
