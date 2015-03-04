@@ -4,7 +4,7 @@
 (function (app) {
     "use strict";
 
-    app.collection.Visualizations = Backbone.Collection.extend({
+    app.collection.Visualizations2 = Backbone.Collection.extend({
         model: app.model.VisFile,
 
         initialize: function (options) {

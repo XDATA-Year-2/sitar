@@ -4,7 +4,7 @@
 (function (app) {
     "use strict";
 
-    app.collection.DataFiles = Backbone.Collection.extend({
+    app.collection.DataFiles2 = Backbone.Collection.extend({
         model: app.model.DataFile,
 
         initialize: function (options) {
