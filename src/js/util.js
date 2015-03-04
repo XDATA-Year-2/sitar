@@ -83,7 +83,7 @@
                 }
 
                 if (_.isFunction(next)) {
-                    next = _.bind(next, myself)(response, responses);
+                    next = next(response, responses);
                     if (_.isArray(next)) {
                         processFunc = whenProcessor(process);
                         next = $.when.apply(null, next);
