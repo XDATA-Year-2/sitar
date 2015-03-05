@@ -43,7 +43,7 @@
 
                 error: _.bind(function () {
                     var view = new app.view.Login({
-                        el: d3.select("#content").append("div").node()
+                        el: d3.select("#content").append("div").classed("down", true).node()
                     });
 
                     view.render({
