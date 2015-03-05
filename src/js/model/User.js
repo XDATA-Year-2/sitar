@@ -138,14 +138,18 @@
             if (fetcher) {
                 fetcher.add({
                     deferred: _.bind(function () {
-                        return this.girderRequest({
-                            url: "/folder",
-                            data: {
-                                parentType: "user",
-                                parentId: this.attribs.user._id,
-                                text: "sitar"
-                            }
-                        });
+                        if (this.girderRequest) {
+                            return this.girderRequest({
+                                url: "/folder",
+                                data: {
+                                    parentType: "user",
+                                    parentId: this.attribs.user._id,
+                                    text: "sitar"
+                                }
+                            });
+                        } else {
+                            return false;
+                        }
                     }, this)
                 });
 
