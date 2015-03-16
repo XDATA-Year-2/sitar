@@ -1,14 +1,11 @@
 /* jshint browser: true */
-/* global Backbone, _ */
+/* global Backbone, _, girder */
 
 (function (app) {
     "use strict";
 
-    // A model of a logged-in user.  Girder requests will be done on behalf of
-    // this user by passing the login token with each request.
+    // A model of a logged-in user.
     app.model.User = Backbone.Model.extend({
-        idAttribute: "token",
-
         sync: function (method, model, options) {
             switch (method) {
                 case "create": {
@@ -47,14 +44,8 @@
             var success,
                 error,
                 failure,
-                cont,
-                token,
                 fetcher,
                 auth;
-
-            // Look for a token in the cookies.  If there is none, the user must
-            // log in.
-            token = app.util.getGirderTokenCookie();
 
             options = options || {};
 
@@ -66,82 +57,56 @@
             failure = Backbone.$.Deferred();
             failure.reject();
 
-            cont = Backbone.$.Deferred();
-            cont.resolve();
-
             this.attribs = {};
 
             // If there's a username/password, try to log in with that
             // (overwriting whatever credentials were in place already);
-            // otherwise, see if there's a token available and try to validate
-            // it; finally, just fail.
+            // otherwise, see if a user is logged in already and, if so, proceed
+            // with that one.
             if (options.username && options.password) {
                 auth = "Basic " + window.btoa(options.username + ":" + options.password);
                 fetcher.then(_.bind(function () {
-                    return Backbone.ajax({
+                    return girder.restRequest({
                         method: "GET",
-                        url: app.girder + "/user/authentication",
+                        path: "/user/authentication",
                         headers: {
                             Authorization: auth
                         },
                         success: _.bind(function (response) {
                             _.extend(this.attribs, {
-                                token: response.authToken.token,
+                                id: response.user._id,
                                 user: response.user
                             });
-
-                            this.girderRequest = app.util.girderRequester(app.girder, token);
                         }, this)
                     });
-                }, this));
-            } else if (token) {
-                this.girderRequest = app.util.girderRequester(app.girder, token);
-
-                fetcher.then(_.bind(function () {
-                    return this.girderRequest({
-                        method: "GET",
-                        url: "/token/current",
-                        success: _.bind(function (response) {
-                            if (!response) {
-                                delete this.girderRequest;
-                            } else {
-                                _.extend(this.attribs, {
-                                    token: response && response._id || null
-                                });
-                            }
-                        }, this)
-                    });
-                }, this));
-
-                fetcher.then(_.bind(function () {
-                    if (this.girderRequest) {
-                        return this.girderRequest({
-                            url: "/user/me",
-                            success: _.bind(function (response) {
-                                _.extend(this.attribs, {
-                                    user: response
-                                });
-                            }, this)
-                        });
-                    } else {
-                        return failure;
-                    }
                 }, this));
             } else {
-                fetcher.then(function () {
-                    return failure;
-                });
+                fetcher.then(_.bind(function () {
+                    return girder.restRequest({
+                        method: "GET",
+                        path: "/user/me",
+                        success: _.bind(function (response) {
+                            _.extend(this.attribs, {
+                                user: response
+                            });
+                        }, this)
+                    });
+                }, this));
             }
 
             fetcher.then(_.bind(function () {
-                return this.girderRequest({
-                    url: "/folder",
-                    data: {
-                        parentType: "user",
-                        parentId: this.attribs.user._id,
-                        text: "sitar"
-                    }
-                });
+                if (this.attribs.user) {
+                    return girder.restRequest({
+                        path: "/folder",
+                        data: {
+                            parentType: "user",
+                            parentId: this.attribs.user._id,
+                            text: "sitar"
+                        }
+                    });
+                } else {
+                    return failure;
+                }
             }, this));
 
             fetcher.then(_.bind(function (home) {
@@ -149,8 +114,8 @@
 
                 if (home) {
                     return Backbone.$.when(
-                        this.girderRequest({
-                            url: "/folder",
+                        girder.restRequest({
+                            path: "/folder",
                             data: {
                                 parentType: "folder",
                                 parentId: home,
@@ -158,8 +123,8 @@
                             }
                         }),
 
-                        this.girderRequest({
-                            url: "/folder",
+                        girder.restRequest({
+                            path: "/folder",
                             data: {
                                 parentType: "folder",
                                 parentId: home,
@@ -187,9 +152,9 @@
             var success = options && options.success || Backbone.$.noop,
                 error = options && options.error || Backbone.$.noop;
 
-            this.girderRequest({
+            girder.restRequest({
                 method: "DELETE",
-                url: "/user/authentication",
+                path: "/user/authentication",
                 success: _.bind(function (r) {
                     this.set("name", "");
                     success(r);

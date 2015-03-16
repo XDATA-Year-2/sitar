@@ -1,10 +1,13 @@
 /* jshint browser: true, jquery: true */
-/* global Backbone */
+/* global Backbone, girder */
 
 $(function () {
     "use strict";
 
     var app = window.app;
+
+    // Initialize Girder.
+    girder.apiRoot = "/plugin/girder/girder/api/v1";
 
     // The logged in user.
     app.user = new app.model.User();
