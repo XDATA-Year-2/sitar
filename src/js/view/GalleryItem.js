@@ -17,7 +17,7 @@
         },
 
         openItemView: function () {
-            app.router.navigate("item/" + this.model.get("id"), {trigger: true});
+            app.router.navigate("vis/" + this.model.get("id"), {trigger: true});
         },
 
         render: function () {

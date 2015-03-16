@@ -45,7 +45,7 @@
                 .html(html)
                 .select("a.thumbnail")
                 .on("click", function () {
-                    app.router.navigate("item/create", {trigger: true});
+                    app.router.navigate("vis/new", {trigger: true});
                 });
 
             this.collection.each(function (visfile, i) {

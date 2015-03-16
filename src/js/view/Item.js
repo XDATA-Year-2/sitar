@@ -33,7 +33,7 @@
                             user: app.user,
                             folderId: app.visFolder,
                             success: _.bind(function () {
-                                app.router.navigate("item/" + this.model.get("id"), {
+                                app.router.navigate("vis/" + this.model.get("id"), {
                                     trigger: false,
                                     replace: true
                                 });
@@ -129,6 +129,9 @@
                 handler;
 
             lyra = window.open("/lyra", "_blank");
+            if (!lyra) {
+                return false;
+            }
 
             lyra.onload = _.bind(function () {
                 var msg,
@@ -184,6 +187,8 @@
             }, this);
 
             window.addEventListener("message", handler);
+
+            return true;
         },
 
         exportURL: function (url, savefile) {

@@ -1,0 +1,50 @@
+.wizard
+    ul.steps
+        li.active(data-step="1") Select Data #[span.chevron]
+        li(data-step="2") Choose a Name #[span.chevron]
+        li(data-step="3") Edit #[span.chevron]
+    .actions
+        button(type="button").btn.btn-default.btn-prev.
+            #[span.glyphicon.glyphicon-arrow-left] Prev
+        button(type="button").btn.btn-default.btn-next.
+            #[span.glyphicon.glyphicon-arrow-right] Next
+    .step-content
+        .step-pane.active.sample-pane(data-step="1")
+            h2 Select a data set to bind to the new visualization
+            select.dataset
+
+        .step-pane.sample-pane(data-step="2")
+            h2 Choose a name and description for the new visualization
+
+            .row
+                span.col-md-4
+                    input(type="text" placeholder="Name").form-control.vis-name
+            .row
+                span.col-md-4
+                    textarea(placeholder="Description" rows="4").form-control.vis-description
+
+        .step-pane.sample-pane(data-step="3")
+            h2 Edit Visualization with Lyra
+
+            p| We are just about ready - if you are satisfied with your data, name,
+             | and description choices, you can go ahead and edit your new
+             | visualization.
+
+            p| Click on "OK" above to launch
+             |  #[a(href="http://idl.cs.washington.edu/projects/lyra/") Lyra].
+             | You will see your data displayed alongside an empty canvas, where you can
+             | create the visualization you want for your data.  Click
+             | the "finished editing" button on the bottom of the screen to
+             | to come back to Sitar, which will upload and save your new creation.
+
+            .bg-danger.hidden
+                h3 Popup Blocked!
+
+                p| To set up your new visualization for editing, Sitar needs to
+                 | open Lyra in a new browser window and then communicate with it.
+
+                p| Not to worry - just set your browser to allow popups from this
+                 | domain, and then try again!
+
+                p| (The window that we already tried to open won't work anymore -
+                 | go ahead and ask your browser to close that one.)

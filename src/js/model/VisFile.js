@@ -332,6 +332,24 @@
             });
         },
 
+        setData: function (datafile, options) {
+            datafile.fetch({
+                fetchContents: true,
+                success: _.bind(function () {
+                    var name = datafile.get("name").split(".")[0];
+
+                    this.set("data", {
+                        name: name,
+                        values: datafile.get("contents")
+                    });
+
+                    if (options && options.success) {
+                        _.bind(options.success, this)();
+                    }
+                }, this)
+            });
+        },
+
         getData: function () {
             if (this.get("data")) {
                 return this.get("data");

@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, _, d3 */
 
 (function (app) {
@@ -8,8 +8,8 @@
         routes: {
             "": "login",
             gallery: "gallery",
-            "item/create": "create",
-            "item/:itemId": "item"
+            "vis/new": "create",
+            "vis/:itemId": "item"
         },
 
         replaceView: function (view) {
@@ -96,7 +96,7 @@
                 }, this),
 
                 error: _.bind(function () {
-                    this.setjmp("item/" + itemId);
+                    this.setjmp("vis/" + itemId);
                 }, this)
             });
         },
@@ -104,7 +104,7 @@
         create: function () {
             app.user.fetch({
                 success: _.bind(function () {
-                    var view = new app.view.Item({
+                    var view = new app.view.NewVis({
                         el: d3.select("#content").append("div").node(),
                         model: new app.model.VisFile({
                             user: app.user
@@ -118,9 +118,26 @@
                 }, this),
 
                 error: _.bind(function () {
-                    this.setjmp("item/create");
+                    this.setjmp("vis/new");
                 }, this)
             });
+        },
+
+        showItem: function (visfile) {
+            var view = new app.view.Item({
+                el: d3.select("#content").append("div").node(),
+                model: visfile
+            });
+
+            view.render();
+            if (!view.edit()) {
+                app.curview.trigger("popup-blocked");
+                view.remove();
+                return;
+            }
+
+            app.navbar.show();
+            this.replaceView(view);
         }
     });
 }(window.app));
