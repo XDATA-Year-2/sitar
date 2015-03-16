@@ -45,130 +45,36 @@
         return obj.firstName + " " + obj.lastName[0] + ".";
     };
 
-    app.util.MonadicDeferredChain = function () {
-        var base = $.Deferred(),
-            pipe = base,
-            sentinel = _.times(128, function () {
-                return _.sample("0123456789abcdef");
-            }).join(""),
-            identity = function (x) {
-                return x;
-            },
-            processFunc = identity,
-            errorFunc = $.noop,
-            errorInvoker,
-            whenProcessor = function (p) {
-                return function () {
-                    var pluckedResponses = _.pluck(arguments, 0);
-                    return [p(pluckedResponses)];
-                };
-            },
-            normalProcessor = function (p) {
-                return function () {
-                    return p(arguments[0]);
-                };
-            },
-            responses = [],
-            previousError = false,
-            accumResults;
+    app.util.DeferredChain = function (first) {
+        var start,
+            link,
+            methods;
 
-        accumResults = function (next, process) {
-            return function () {
-                var response;
+        if (!first) {
+            throw new Error("argument 'first' is required");
+        }
 
-                response = processFunc.apply(null, arguments);
-                if (response !== sentinel) {
-                    responses = responses.concat([response]);
-                } else {
-                    response = _.last(responses);
-                }
+        start = link = first;
 
-                if (_.isFunction(next)) {
-                    next = next(response, responses);
-                    if (_.isArray(next)) {
-                        processFunc = whenProcessor(process);
-                        next = $.when.apply(null, next);
-                    } else if (next === false) {
-                        previousError = true;
-                        next = undefined;
-                    } else {
-                        processFunc = normalProcessor(process);
-                    }
-
-                    if (_.isUndefined(next)) {
-                        next = $.Deferred();
-                        next.resolve(sentinel);
-                    }
-                } else {
-                    processFunc = process;
-                }
-
-                return next;
-            };
-        };
-
-        errorInvoker = function (errorFunc) {
-            return function () {
-                errorFunc(responses, previousError);
-                previousError = true;
-            };
-        };
-
-        return {
-            add: function (action) {
-                var deferred,
-                    userProcess,
-                    process,
-                    error;
-
-                action = action || {};
-                deferred = action.deferred;
-                error = action.error || $.noop;
-                userProcess = action.process || identity;
-
-                if (!deferred) {
-                    deferred = $.Deferred();
-                    deferred.resolve(sentinel);
-                }
-
-                if (_.isArray(deferred)) {
-                    // Treat this as an array of deferreds to be managed with $.when.
-                    //
-                    // This is in an if-clause rather than else-if because in case
-                    // deferred was passed in as a function that returns an array, we
-                    // still want this phase triggered on that return value.
-                    deferred = $.when.apply(null, deferred);
-
-                    // Create a special-purpose processor to gather up the
-                    // specially-prepared response to a 'when'.
-                    process = whenProcessor(userProcess);
-                } else if (_.isFunction(deferred)) {
-                    process = userProcess;
-                } else {
-                    process = normalProcessor(userProcess);
-                }
-
-                pipe = pipe.then(accumResults(deferred, process), errorInvoker(errorFunc));
-                errorFunc = error;
-                return pipe;
-            },
-
-            run: function (success, error) {
-                this.add();
-                base.resolve(sentinel);
-
-                success = success || $.noop;
-                error = error || $.noop;
-
-                return pipe.always(function () {
-                    if (previousError) {
-                        error(responses);
-                    } else {
-                        success(responses);
-                    }
-                });
+        methods = {
+            then: function () {
+                link = link.then.apply(link, arguments);
             }
         };
+
+        _.each(["reject", "rejectWith", "resolve", "resolveWith"], function (f) {
+            methods[f] = function () {
+                return start[f].apply(start, arguments);
+            };
+        });
+
+        _.each(["always", "done", "fail", "notify", "notifyWith", "progress", "promise", "state"], function (f) {
+            methods[f] = function () {
+                return link[f].apply(link, arguments);
+            };
+        });
+
+        return methods;
     };
 
     app.util.girderRequester = function (root, token) {

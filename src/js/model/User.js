@@ -46,6 +46,8 @@
         readHandler: function (options) {
             var success,
                 error,
+                failure,
+                cont,
                 token,
                 fetcher,
                 auth;
@@ -59,7 +61,13 @@
             success = options.success || Backbone.$.noop;
             error = options.error || Backbone.$.noop;
 
-            fetcher = new app.util.MonadicDeferredChain();
+            fetcher = new app.util.DeferredChain(Backbone.$.Deferred());
+
+            failure = Backbone.$.Deferred();
+            failure.reject();
+
+            cont = Backbone.$.Deferred();
+            cont.resolve();
 
             this.attribs = {};
 
@@ -69,129 +77,110 @@
             // it; finally, just fail.
             if (options.username && options.password) {
                 auth = "Basic " + window.btoa(options.username + ":" + options.password);
-                fetcher.add({
-                    deferred: Backbone.ajax({
+                fetcher.then(_.bind(function () {
+                    return Backbone.ajax({
                         method: "GET",
                         url: app.girder + "/user/authentication",
                         headers: {
                             Authorization: auth
-                        }
-                    }),
+                        },
+                        success: _.bind(function (response) {
+                            _.extend(this.attribs, {
+                                token: response.authToken.token,
+                                user: response.user
+                            });
 
-                    process: _.bind(function (response) {
-                        _.extend(this.attribs, {
-                            token: response.authToken.token,
-                            user: response.user
-                        });
-
-                        this.girderRequest = app.util.girderRequester(app.girder, token);
-
-                        return response;
-                    }, this)
-                });
+                            this.girderRequest = app.util.girderRequester(app.girder, token);
+                        }, this)
+                    });
+                }, this));
             } else if (token) {
                 this.girderRequest = app.util.girderRequester(app.girder, token);
 
-                fetcher.add({
-                    deferred: this.girderRequest({
+                fetcher.then(_.bind(function () {
+                    return this.girderRequest({
                         method: "GET",
-                        url: "/token/current"
-                    }),
+                        url: "/token/current",
+                        success: _.bind(function (response) {
+                            if (!response) {
+                                delete this.girderRequest;
+                            } else {
+                                _.extend(this.attribs, {
+                                    token: response && response._id || null
+                                });
+                            }
+                        }, this)
+                    });
+                }, this));
 
-                    process: _.bind(function (response) {
-                        if (!response) {
-                            delete this.girderRequest;
-                        } else {
-                            _.extend(this.attribs, {
-                                token: response && response._id || null
-                            });
-                        }
-
-                        return response;
-                    }, this)
-                });
-
-                fetcher.add({
-                    deferred: _.bind(function () {
-                        if (this.girderRequest) {
-                            return this.girderRequest({
-                                url: "/user/me"
-                            });
-                        } else {
-                            return false;
-                        }
-                    }, this),
-
-                    process: _.bind(function (response) {
-                        _.extend(this.attribs, {
-                            user: response
+                fetcher.then(_.bind(function () {
+                    if (this.girderRequest) {
+                        return this.girderRequest({
+                            url: "/user/me",
+                            success: _.bind(function (response) {
+                                _.extend(this.attribs, {
+                                    user: response
+                                });
+                            }, this)
                         });
-
-                        return response;
-                    }, this)
-                });
+                    } else {
+                        return failure;
+                    }
+                }, this));
             } else {
-                error(null);
-                fetcher = undefined;
-            }
-
-            if (fetcher) {
-                fetcher.add({
-                    deferred: _.bind(function () {
-                        if (this.girderRequest) {
-                            return this.girderRequest({
-                                url: "/folder",
-                                data: {
-                                    parentType: "user",
-                                    parentId: this.attribs.user._id,
-                                    text: "sitar"
-                                }
-                            });
-                        } else {
-                            return false;
-                        }
-                    }, this)
-                });
-
-                fetcher.add({
-                    deferred: _.bind(function (last) {
-                        var home = last && last[0] && last[0]._id;
-
-                        if (home) {
-                            return [
-                                this.girderRequest({
-                                    url: "/folder",
-                                    data: {
-                                        parentType: "folder",
-                                        parentId: home,
-                                        text: "visualizations"
-                                    }
-                                }),
-
-                                this.girderRequest({
-                                    url: "/folder",
-                                    data: {
-                                        parentType: "folder",
-                                        parentId: home,
-                                        text: "data"
-                                    }
-                                })
-                            ];
-                        }
-                    }, this),
-
-                    process: _.bind(function (response) {
-                        _.extend(this.attribs, {
-                            visFolder: response[0][0]._id,
-                            dataFolder: response[1][0]._id
-                        });
-
-                        return response;
-                    }, this)
+                fetcher.then(function () {
+                    return failure;
                 });
             }
 
-            return fetcher && fetcher.run(success, error);
+            fetcher.then(_.bind(function () {
+                return this.girderRequest({
+                    url: "/folder",
+                    data: {
+                        parentType: "user",
+                        parentId: this.attribs.user._id,
+                        text: "sitar"
+                    }
+                });
+            }, this));
+
+            fetcher.then(_.bind(function (home) {
+                home = home && home[0] && home[0]._id;
+
+                if (home) {
+                    return Backbone.$.when(
+                        this.girderRequest({
+                            url: "/folder",
+                            data: {
+                                parentType: "folder",
+                                parentId: home,
+                                text: "visualizations"
+                            }
+                        }),
+
+                        this.girderRequest({
+                            url: "/folder",
+                            data: {
+                                parentType: "folder",
+                                parentId: home,
+                                text: "data"
+                            }
+                        })
+                    );
+                } else {
+                    return failure;
+                }
+            }, this));
+
+            fetcher.then(_.bind(function (visFolder, dataFolder) {
+                _.extend(this.attribs, {
+                    visFolder: visFolder[0][0]._id,
+                    dataFolder: dataFolder[0][0]._id
+                });
+                success();
+            }, this), error);
+
+            fetcher.resolve();
         },
 
         logout: function (options) {
