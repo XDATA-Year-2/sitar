@@ -4,9 +4,7 @@
 (function (app) {
     "use strict";
 
-    app.collection.Visualizations = Backbone.Collection.extend({
-        model: app.model.VisFile,
-
+    app.collection.Files = Backbone.Collection.extend({
         initialize: function (options) {
             options = options || {};
 
@@ -14,8 +12,14 @@
                 throw new Error("'user' option is required");
             }
 
+            if (!options.folderId) {
+                throw new Error("'folderId' option is required");
+            }
+
             this.user = options.user;
             this.girderRequest = app.util.girderRequester(app.girder, this.user.get("token"));
+
+            this.folderId = options.folderId;
         },
 
         sync: function (method, collection, options) {
@@ -44,11 +48,32 @@
             return this.girderRequest({
                 url: "/item",
                 data: {
-                    folderId: this.user.get("visFolder")
+                    folderId: this.folderId
                 },
                 success: options.success || Backbone.$.noop,
                 error: options.error || Backbone.$.noop
             });
         }
     });
+
+    var extendFiles = function (model, folderIdField) {
+        return app.collection.Files.extend({
+            model: model,
+
+            initialize: function (options) {
+                options = options || {};
+
+                if (!options.user) {
+                    throw new Error("'user' option is required");
+                }
+
+                options.folderId = options.user.get(folderIdField);
+
+                app.collection.Files.prototype.initialize.call(this, options);
+            }
+        });
+    };
+
+    app.collection.Visualizations = extendFiles(app.model.VisFile, "visFolder");
+    app.collection.DataFiles = extendFiles(app.model.DataFile, "dataFolder");
 }(window.app));
