@@ -1,5 +1,5 @@
 /* jshint browser: true, jquery: true */
-/* global _ */
+/* global Backbone, _ */
 
 (function (app) {
     "use strict";
@@ -46,13 +46,14 @@
     };
 
     app.util.MonadicDeferredChain = function () {
-        var myself = this,
-            base = $.Deferred(),
+        var base = $.Deferred(),
             pipe = base,
             sentinel = _.times(128, function () {
                 return _.sample("0123456789abcdef");
             }).join(""),
-            identity = function (x) { return x; },
+            identity = function (x) {
+                return x;
+            },
             processFunc = identity,
             errorFunc = $.noop,
             errorInvoker,
@@ -83,9 +84,10 @@
                 }
 
                 if (_.isFunction(next)) {
-                    next = _.bind(next, myself)(response, responses);
+                    next = next(response, responses);
                     if (_.isArray(next)) {
                         processFunc = whenProcessor(process);
+                        next = $.when.apply(null, next);
                     } else if (next === false) {
                         previousError = true;
                         next = undefined;
@@ -166,6 +168,20 @@
                     }
                 });
             }
+        };
+    };
+
+    app.util.girderRequester = function (root, token) {
+        return function (options) {
+            options.headers = _.extend(options.headers || {}, {
+                "Girder-Token": token
+            });
+
+            if (options.url) {
+                options.url = root + options.url;
+            }
+
+            return Backbone.ajax(options);
         };
     };
 }(window.app));

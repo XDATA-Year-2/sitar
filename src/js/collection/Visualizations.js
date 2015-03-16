@@ -15,6 +15,7 @@
             }
 
             this.user = options.user;
+            this.girderRequest = app.util.girderRequester(app.girder, this.user.get("token"));
         },
 
         sync: function (method, collection, options) {
@@ -30,8 +31,7 @@
             }
         },
 
-        parse: function (responses) {
-            var items = responses[2] || [];
+        parse: function (items) {
             return _.map(items, function (item) {
                 return new this.model({
                     id: item._id,
@@ -41,72 +41,14 @@
         },
 
         readHandler: function (options) {
-            var actions;
-
-            options = options || {};
-
-            // Start a new monadic callback chain.
-            actions = new app.util.MonadicDeferredChain();
-
-            // First, query Girder for the user's file listing, looking for a
-            // directory named "sitar".
-            actions.add({
-                deferred: Backbone.ajax({
-                    url: app.girder + "/folder",
-                    data: {
-                        parentType: "user",
-                        parentId: this.user.get("user")._id,
-                        text: "sitar"
-                    },
-                    headers: {
-                        "Girder-Token": this.user.get("token")
-                    }
-                })
+            return this.girderRequest({
+                url: "/item",
+                data: {
+                    folderId: this.user.get("visFolder")
+                },
+                success: options.success || Backbone.$.noop,
+                error: options.error || Backbone.$.noop
             });
-
-            // Next, dive into the "sitar" folder (if it exists).
-            actions.add({
-                deferred: _.bind(function (sitar) {
-                    if (sitar.length === 0) {
-                        return;
-                    }
-
-                    return Backbone.ajax({
-                        url: app.girder + "/folder",
-                        data: {
-                            parentType: "folder",
-                            parentId: sitar[0]._id,
-                            text: "visualizations"
-                        },
-                        headers: {
-                            "Girder-Token": this.user.get("token")
-                        }
-                    });
-                }, this)
-            });
-
-            // Finally, open up the "visualizations" subdirectory.
-            actions.add({
-                deferred: _.bind(function (visfolder) {
-                    if (visfolder.length === 0) {
-                        return;
-                    }
-
-                    app.visFolder = visfolder[0]._id;
-
-                    return Backbone.ajax({
-                        url: app.girder + "/item",
-                        data: {
-                            folderId: visfolder[0]._id
-                        },
-                        headers: {
-                            "Girder-Token": this.user.get("token")
-                        }
-                    });
-                }, this)
-            });
-
-            return actions.run(options.success || Backbone.$.noop, options.error || Backbone.$.noop);
         }
     });
 }(window.app));

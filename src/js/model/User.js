@@ -35,32 +35,10 @@
             }
         },
 
-        parse: function (response) {
-            var user;
-
-            if (response.length === 0) {
-                return;
-            } else if (response.length === 1) {
-                if (response[0]) {
-                    user = response[0].user;
-
-                    return {
-                        token: response[0].token,
-                        user: user,
-                        name: user.firstName + " " + user.lastName[0] + "."
-                    };
-                }
-            } else if (response.length === 2) {
-                user = response[1];
-
-                return {
-                    token: response[0],
-                    user: user,
-                    name: user.firstName + " " + user.lastName[0] + "."
-                };
-            } else {
-                throw new Error("response should not be longer than 2 elements", response);
-            }
+        parse: function () {
+            var attribs = this.attribs;
+            delete this.attribs;
+            return attribs;
         },
 
         readHandler: function (options) {
@@ -81,6 +59,8 @@
 
             fetcher = new app.util.MonadicDeferredChain();
 
+            this.attribs = {};
+
             // If there's a username/password, try to log in with that
             // (overwriting whatever credentials were in place already);
             // otherwise, see if there's a token available and try to validate
@@ -97,41 +77,106 @@
                     }),
 
                     process: function (response) {
-                        return {
+                        _.extend(this.attribs, {
                             token: response.authToken.token,
                             user: response.user
-                        };
+                        });
+
+                        return response;
                     }
                 });
             } else if (token) {
+                this.girderRequest = app.util.girderRequester(app.girder, token);
+
                 fetcher.add({
-                    deferred: Backbone.ajax({
+                    deferred: this.girderRequest({
                         method: "GET",
-                        url: app.girder + "/token/current",
-                        headers: {
-                            "Girder-Token": token
-                        },
+                        url: "/token/current"
                     }),
 
-                    process: function (response) {
-                        return response && response._id || null;
-                    }
+                    process: _.bind(function (response) {
+                        _.extend(this.attribs, {
+                            token: response && response._id || null
+                        });
+
+                        return response;
+                    }, this)
                 });
 
                 fetcher.add({
-                    deferred: function (token) {
-                        return !!token && Backbone.ajax({
-                            method: "GET",
-                            url: app.girder + "/user/me",
-                            headers: {
-                                "Girder-Token": token
-                            }
+                    deferred: _.bind(function () {
+                        if (this.girderRequest) {
+                            return this.girderRequest({
+                                url: "/user/me"
+                            });
+                        } else {
+                            return false;
+                        }
+                    }, this),
+
+                    process: _.bind(function (response) {
+                        _.extend(this.attribs, {
+                            user: response
                         });
-                    }
+
+                        return response;
+                    }, this)
                 });
             } else {
                 error(null);
                 fetcher = undefined;
+            }
+
+            if (fetcher) {
+                fetcher.add({
+                    deferred: _.bind(function () {
+                        return this.girderRequest({
+                            url: "/folder",
+                            data: {
+                                parentType: "user",
+                                parentId: this.attribs.user._id,
+                                text: "sitar"
+                            }
+                        });
+                    }, this)
+                });
+
+                fetcher.add({
+                    deferred: _.bind(function (last) {
+                        var home = last && last[0] && last[0]._id;
+
+                        if (home) {
+                            return [
+                                this.girderRequest({
+                                    url: "/folder",
+                                    data: {
+                                        parentType: "folder",
+                                        parentId: home,
+                                        text: "visualizations"
+                                    }
+                                }),
+
+                                this.girderRequest({
+                                    url: "/folder",
+                                    data: {
+                                        parentType: "folder",
+                                        parentId: home,
+                                        text: "data"
+                                    }
+                                })
+                            ];
+                        }
+                    }, this),
+
+                    process: _.bind(function (response) {
+                        _.extend(this.attribs, {
+                            visFolder: response[0][0]._id,
+                            dataFolder: response[1][0]._id
+                        });
+
+                        return response;
+                    }, this)
+                });
             }
 
             return fetcher && fetcher.run(success, error);
@@ -141,12 +186,9 @@
             var success = options && options.success || Backbone.$.noop,
                 error = options && options.error || Backbone.$.noop;
 
-            Backbone.ajax({
+            this.girderRequest({
                 method: "DELETE",
-                url: "/plugin/girder/girder/api/v1/user/authentication",
-                headers: {
-                    "Girder-Token": this.get("token")
-                },
+                url: "/user/authentication",
                 success: _.bind(function (r) {
                     this.set("name", "");
                     success(r);
