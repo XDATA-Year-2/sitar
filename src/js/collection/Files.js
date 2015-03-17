@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _ */
+/* global Backbone, _, girder */
 
 (function (app) {
     "use strict";
@@ -17,8 +17,6 @@
             }
 
             this.user = options.user;
-            this.girderRequest = app.util.girderRequester(app.girder, this.user.get("token"));
-
             this.folderId = options.folderId;
         },
 
@@ -45,8 +43,8 @@
         },
 
         readHandler: function (options) {
-            return this.girderRequest({
-                url: "/item",
+            return girder.restRequest({
+                path: "/item",
                 data: {
                     folderId: this.folderId
                 },

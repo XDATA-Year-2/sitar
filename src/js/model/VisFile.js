@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _ */
+/* global Backbone, _, girder */
 
 (function (app) {
     "use strict";
@@ -31,8 +31,6 @@
             if (!this.get("user")) {
                 throw new Error("'user' property is required");
             }
-
-            this.girderRequest = app.util.girderRequester(app.girder, this.get("user").get("token"));
         },
 
         sync: function (method, model, options) {
@@ -94,9 +92,9 @@
                 form.append("uploadId", upload._id);
                 form.append("chunk", blob);
 
-                this.girderRequest({
-                    url: "/file/chunk",
-                    type: "POST",
+                girder.restRequest({
+                    method: "POST",
+                    path: "/file/chunk",
                     data: form,
                     contentType: false,
                     processData: false,
@@ -114,8 +112,8 @@
 
             if (_.isString(filename)) {
                 options2 = {
-                    url: "/file",
-                    type: "POST",
+                    method: "POST",
+                    path: "/file",
                     data: {
                         parentType: "item",
                         parentId: this.get("id"),
@@ -128,8 +126,8 @@
                 };
             } else {
                 options2 = {
-                    url: "/file/" + filename.id + "/contents",
-                    type: "PUT",
+                    method: "PUT",
+                    path: "/file/" + filename.id + "/contents",
                     data: {
                         size: data.length
                     },
@@ -139,7 +137,7 @@
                 };
             }
 
-            this.girderRequest(options2);
+            girder.restRequest(options2);
         },
 
         errorHandler: function (options) {
@@ -180,10 +178,9 @@
                 // If requested, retrieve the Vega spec itself, then set the
                 // attributes; otherwise, just set the attributes.
                 if (options.fetchVega) {
-                    this.girderRequest({
+                    girder.restRequest({
                         method: "GET",
-                        url: "/file/" + vegaFile._id + "/download",
-                        dataType: "json",
+                        path: "/file/" + vegaFile._id + "/download",
                         success: _.bind(function (vega) {
                             attrib.vega = vega;
                             this.set(attrib);
@@ -211,10 +208,9 @@
             // for the files contained within (the poster image and the actual
             // vega spec).
             _.each(urls, _.bind(function (url, i) {
-                this.girderRequest({
+                girder.restRequest({
                     method: "GET",
-                    url: url,
-                    dataType: "json",
+                    path: url,
                     success: callback(i),
                     error: this.errorHandler(options)
                 });
@@ -229,15 +225,14 @@
             }
 
             // Create an item.
-            this.girderRequest({
+            girder.restRequest({
                 method: "POST",
-                url: "/item",
+                path: "/item",
                 data: {
                     folderId: options.folderId,
                     name: this.get("title") || "new vis",
                     description: this.get("description") || "new descriptionless vis!!"
                 },
-                dataType: "json",
                 success: _.bind(function (item) {
                     var finalize;
 
@@ -311,9 +306,9 @@
             var success = options && options.success || Backbone.$.noop,
                 error = options && options.error || Backbone.$.noop;
 
-            this.girderRequest({
+            girder.restRequest({
                 method: "DELETE",
-                url: "/item/" + this.get("id"),
+                path: "/item/" + this.get("id"),
                 success: function () {
                     success(this, undefined, options);
                 },
