@@ -4,6 +4,15 @@
 (function (app) {
     "use strict";
 
+    var binData = function (data) {
+        var nums = new Array(data.length);
+        _.each(data, function (_, i) {
+            nums[i] = data.charCodeAt(i);
+        });
+
+        return new Uint8Array(nums);
+    };
+
     // A model of a "vis file".  This is conceptualized as the following list of
     // information:
     //
@@ -53,85 +62,6 @@
                     throw new Error("illegal condition: sync method was '" + method + "'");
                 }
             }
-        },
-
-        upload: function (data, filename, options) {
-            var uploadChunks,
-                blob,
-                nums,
-                options2,
-                bdata;
-
-            options = options || {};
-            options.type = options.type || "";
-
-            if (options.binary) {
-                nums = new Array(data.length);
-                _.each(data, function (_, i) {
-                    nums[i] = data.charCodeAt(i);
-                });
-
-                bdata = new Uint8Array(nums);
-            } else {
-                bdata = data;
-            }
-
-            blob = new window.Blob([bdata], {type: options.type});
-
-            uploadChunks = _.bind(function (upload) {
-                var form;
-
-                form = new window.FormData();
-                form.append("offset", 0);
-                form.append("uploadId", upload._id);
-                form.append("chunk", blob);
-
-                girder.restRequest({
-                    method: "POST",
-                    path: "/file/chunk",
-                    data: form,
-                    contentType: false,
-                    processData: false,
-                    success: _.bind(function () {
-                        if (options.idField) {
-                            this.set(options.idField, upload._id);
-                        }
-
-                        if (options.success) {
-                            options.success();
-                        }
-                    }, this)
-                });
-            }, this);
-
-            if (_.isString(filename)) {
-                options2 = {
-                    method: "POST",
-                    path: "/file",
-                    data: {
-                        parentType: "item",
-                        parentId: this.get("id"),
-                        name: filename,
-                        size: data.length
-                    },
-                    success: function (upload) {
-                        uploadChunks(upload);
-                    }
-                };
-            } else {
-                options2 = {
-                    method: "PUT",
-                    path: "/file/" + filename.id + "/contents",
-                    data: {
-                        size: data.length
-                    },
-                    success: function (upload) {
-                        uploadChunks(upload);
-                    }
-                };
-            }
-
-            girder.restRequest(options2);
         },
 
         errorHandler: function (options) {
@@ -228,19 +158,20 @@
                     description: this.get("description") || "new descriptionless vis!!"
                 },
                 success: _.bind(function (item) {
-                    var finalize;
+                    var finalize,
+                        file;
 
                     // Set the id *again* here to cause a change event to be
                     // emitted - this is so that if the gallery is listening
                     // for id changes, it doesn't try to re-render a
                     // GalleryItem until after the uploads are complete.
-                    finalize = _.bind(function () {
+                    finalize = _.after(2, _.bind(function () {
                         this.set("id", item._id);
 
                         if (options.success) {
                             options.success(this, undefined, options);
                         }
-                    }, this);
+                    }, this));
 
                     // Set the id just before the upload phase, but
                     // "silently", so as not to trigger re-renders based on
@@ -249,23 +180,28 @@
                         silent: true
                     });
 
-                    this.upload(JSON.stringify(this.get("vega"), null, 4), "vega.json", {
-                        success: finalize,
-                        idField: "vegaId"
-                    });
+                    // Upload the vega spec into our item.
+                    file = new girder.models.FileModel();
+                    file.uploadToItem(item._id, JSON.stringify(this.get("vega"), null, 4), "vega.json");
+                    file.on("g:upload.complete", _.bind(function () {
+                        this.set("vegaId", file.get("_id"));
+                        finalize();
+                    }, this));
 
-                    this.upload(this.get("png"), "poster.png", {
-                        success: finalize,
-                        idField: "posterId",
-                        binary: true,
-                        type: "application/octet-binary"
-                    });
+                    // Upload the poster image too.
+                    file = new girder.models.FileModel();
+                    file.uploadToItem(item._id, binData(this.get("png")), "poster.png", "application/octet-binary");
+                    file.on("g:upload.complete", _.bind(function () {
+                        this.set("posterId", file.get("_id"));
+                        finalize();
+                    }, this));
                 }, this)
             });
         },
 
         updateHandler: function (options) {
             var successCount = 0,
+                file,
                 success,
                 callback;
 
@@ -274,7 +210,7 @@
                     this.trigger("edit");
                     _.bind(options.success || Backbone.$.noop, this)();
                 } else {
-                    _.bin(options.error || Backbone.$.noop, this)();
+                    _.bind(options.error || Backbone.$.noop, this)();
                 }
             }, this));
 
@@ -283,17 +219,21 @@
                 callback();
             };
 
-            this.upload(JSON.stringify(this.get("vega"), null, 4), {id: this.get("vegaId")}, {
-                success: success,
-                error: callback
+            // Update the vega spec in-place.
+            file = new girder.models.FileModel({
+                _id: this.get("vegaId")
             });
+            file.updateContents(JSON.stringify(this.get("vega"), null, 4));
+            file.on("g:upload.complete", success);
+            file.on("g:upload.error", callback);
 
-            this.upload(this.get("png"), {id: this.get("posterId")}, {
-                success: success,
-                error: callback,
-                binary: true,
-                type: "application/octet-binary"
+            // And also the poster image.
+            file = new girder.models.FileModel({
+                _id: this.get("posterId")
             });
+            file.updateContents(binData(this.get("png")));
+            file.on("g:upload.complete", success);
+            file.on("g:upload.error", callback);
         },
 
         deleteHandler: function (options) {
