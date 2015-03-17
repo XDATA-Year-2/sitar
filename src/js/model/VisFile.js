@@ -27,12 +27,6 @@
     // the Gallery view, and also a more detailed view for an individual item,
     // which will also enable editing/saving/etc.
     app.model.VisFile = Backbone.Model.extend({
-        initialize: function () {
-            if (!this.get("user")) {
-                throw new Error("'user' property is required");
-            }
-        },
-
         sync: function (method, model, options) {
             switch (method) {
                 case "create": {

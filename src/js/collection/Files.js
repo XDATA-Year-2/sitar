@@ -8,15 +8,10 @@
         initialize: function (options) {
             options = options || {};
 
-            if (!options.user) {
-                throw new Error("'user' option is required");
-            }
-
             if (!options.folderId) {
                 throw new Error("'folderId' option is required");
             }
 
-            this.user = options.user;
             this.folderId = options.folderId;
         },
 
@@ -36,8 +31,7 @@
         parse: function (items) {
             return _.map(items, function (item) {
                 return new this.model({
-                    id: item._id,
-                    user: this.user
+                    id: item._id
                 });
             }, this);
         },
@@ -60,10 +54,6 @@
 
             initialize: function (options) {
                 options = options || {};
-
-                if (!options.user) {
-                    throw new Error("'user' option is required");
-                }
 
                 options.folderId = options.user.get(folderIdField);
 
