@@ -34,8 +34,6 @@
                 username: username,
                 password: password,
                 success: function () {
-                    app.jumpback = null;
-
                     d3.select("#jumpback")
                         .classed("hidden", true);
 
