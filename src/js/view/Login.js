@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, d3 */
+/* global Backbone, d3, girder */
 
 (function (app) {
     "use strict";
@@ -30,10 +30,8 @@
                 .property("value");
 
             // Attempt to log the user in if not already logged in.
-            app.user.fetch({
-                username: username,
-                password: password,
-                success: function () {
+            girder.login(username, password)
+                .then(function () {
                     d3.select("#jumpback")
                         .classed("hidden", true);
 
@@ -47,12 +45,10 @@
                         .property("value", "");
 
                     app.router.longjmp("gallery");
-                },
-                error: function () {
+                }, function () {
                     d3.select("#failed")
                         .classed("hidden", false);
-                }
-            });
+                });
 
             evt.preventDefault();
         },

@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _, d3 */
+/* global Backbone, _, d3, girder */
 
 (function (app) {
     "use strict";
@@ -22,7 +22,7 @@
 
         render: function () {
             var html = app.templates.galleryItem({
-                posterUrl: app.girder + "/file/" + this.model.get("posterId") + "/download",
+                posterUrl: girder.apiRoot + "/file/" + this.model.get("posterId") + "/download",
                 title: this.model.get("title"),
                 description: this.model.get("description")
             });

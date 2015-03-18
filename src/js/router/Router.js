@@ -1,4 +1,4 @@
-/* jshint browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, _, d3 */
 
 (function (app) {
@@ -36,91 +36,82 @@
         },
 
         login: function () {
-            app.user.fetch({
-                success: _.bind(function () {
-                    this.longjmp("gallery");
-                }, this),
+            var view;
 
-                error: _.bind(function () {
-                    var view = new app.view.Login({
-                        el: d3.select("#content").append("div").classed("down", true).node()
-                    });
+            if (app.home.user.isNew()) {
+                view = new app.view.Login({
+                    el: d3.select("#content").append("div").classed("down", true).node()
+                });
 
-                    view.render({
-                        jumpback: this.jumpback
-                    });
+                view.render({
+                    jumpback: this.jumpback
+                });
 
-                    app.navbar.hide();
-                    this.replaceView(view);
-                }, this)
-            });
+                app.navbar.hide();
+                this.replaceView(view);
+            } else {
+                this.longjmp("gallery");
+            }
         },
 
         gallery: function () {
-            app.user.fetch({
-                success: _.bind(function () {
-                    var view;
+            var view;
 
-                    view = new app.view.Gallery({
-                        collection: new app.collection.Visualizations({
-                            user: app.user
-                        }),
-                        el: d3.select("#content").append("div").node()
-                    });
+            if (app.home.user.isNew()) {
+                this.setjmp("gallery");
+            } else if (!app.home.isValid()) {
+                app.home.fetch({
+                    success: _.bind(function () {
+                        this.gallery();
+                    }, this)
+                });
+            } else {
+                view = new app.view.Gallery({
+                    collection: new app.collection.Visualizations({
+                        home: app.home
+                    }),
+                    el: d3.select("#content").append("div").node()
+                });
 
-                    app.navbar.show();
-                    this.replaceView(view);
-                }, this),
-
-                error: _.bind(function () {
-                    this.setjmp("gallery");
-                }, this)
-            });
+                app.navbar.show();
+                this.replaceView(view);
+            }
         },
 
         item: function (itemId) {
-            app.user.fetch({
-                success: _.bind(function () {
-                    var view;
+            var view;
 
-                    view = new app.view.Item({
-                        el: d3.select("#content").append("div").node(),
-                        model: new app.model.VisFile({
-                            id: itemId,
-                            user: app.user
-                        })
-                    });
+            if (app.home.user.isNew()) {
+                this.setjmp("vis/" + itemId);
+            } else {
+                view = new app.view.Item({
+                    el: d3.select("#content").append("div").node(),
+                    model: new app.model.VisFile({
+                        id: itemId
+                    })
+                });
 
-                    app.navbar.show();
-                    this.replaceView(view);
-                }, this),
-
-                error: _.bind(function () {
-                    this.setjmp("vis/" + itemId);
-                }, this)
-            });
+                app.navbar.show();
+                this.replaceView(view);
+            }
         },
 
         create: function () {
-            app.user.fetch({
-                success: _.bind(function () {
-                    var view = new app.view.NewVis({
-                        el: d3.select("#content").append("div").node(),
-                        model: new app.model.VisFile({
-                            user: app.user
-                        })
-                    });
+            var view;
 
-                    view.render();
+            if (app.home.user.isNew()) {
+                this.setjmp("vis/new");
+            } else {
+                view = new app.view.NewVis({
+                    el: d3.select("#content").append("div").node(),
+                    model: new app.model.VisFile()
+                });
 
-                    app.navbar.show();
-                    this.replaceView(view);
-                }, this),
+                view.render();
 
-                error: _.bind(function () {
-                    this.setjmp("vis/new");
-                }, this)
-            });
+                app.navbar.show();
+                this.replaceView(view);
+            }
         },
 
         showItem: function (visfile) {
