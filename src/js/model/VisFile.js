@@ -82,15 +82,19 @@
                 var attrib = {},
                     item,
                     posterFile,
-                    vegaFile;
+                    timelineFile,
+                    vegaFile,
+                    finalize2;
 
                 // 'results' should contain two entries - the first is an object
                 // with the overall item properties; the second is an array of
-                // two objects containing information about the "poster" and the
-                // vega spec.
+                // three objects containing information about the "poster", the
+                // vega spec, and the timeline object (used by Lyra to record
+                // editing history, etc.).
                 item = results[0];
                 posterFile = results[1][0];
-                vegaFile = results[1][1];
+                timelineFile = results[1][1];
+                vegaFile = results[1][2];
 
                 // Extract and collect the necessary properties from the
                 // results.
@@ -98,20 +102,35 @@
                 attrib.description = item.description;
                 attrib.posterId = posterFile._id;
                 attrib.vegaId = vegaFile._id;
+                attrib.timelineId = timelineFile._id;
 
-                // If requested, retrieve the Vega spec itself, then set the
-                // attributes; otherwise, just set the attributes.
+                // If requested, retrieve the Vega spec and timeline data, then
+                // set the attributes; otherwise, just set the attributes.
                 if (options.fetchVega) {
+                    finalize2 = _.after(2, _.bind(function () {
+                        this.set(attrib);
+
+                        if (options.success) {
+                            options.success(this, undefined, options);
+                        }
+                    }, this));
+
                     girder.restRequest({
                         method: "GET",
                         path: "/file/" + vegaFile._id + "/download",
                         success: _.bind(function (vega) {
                             attrib.vega = vega;
-                            this.set(attrib);
+                            finalize2();
+                        }, this),
+                        error: this.errorHandler(options)
+                    });
 
-                            if (options.success) {
-                                options.success(this, undefined, options);
-                            }
+                    girder.restRequest({
+                        method: "GET",
+                        path: "/file/" + timelineFile._id + "/download",
+                        success: _.bind(function (timeline) {
+                            attrib.timeline = timeline;
+                            finalize2();
                         }, this),
                         error: this.errorHandler(options)
                     });
@@ -165,7 +184,7 @@
                     // emitted - this is so that if the gallery is listening
                     // for id changes, it doesn't try to re-render a
                     // GalleryItem until after the uploads are complete.
-                    finalize = _.after(2, _.bind(function () {
+                    finalize = _.after(3, _.bind(function () {
                         this.set("id", item._id);
 
                         if (options.success) {
@@ -188,6 +207,14 @@
                         finalize();
                     }, this));
 
+                    // Upload the timeline.
+                    file = new girder.models.FileModel();
+                    file.uploadToItem(item._id, JSON.stringify(this.get("timeline"), null, 4), "timeline.json");
+                    file.on("g:upload.complete", _.bind(function () {
+                        this.set("timelineId", file.get("_id"));
+                        finalize();
+                    }, this));
+
                     // Upload the poster image too.
                     file = new girder.models.FileModel();
                     file.uploadToItem(item._id, binData(this.get("png")), "poster.png", "application/octet-binary");
@@ -205,8 +232,8 @@
                 success,
                 callback;
 
-            callback = _.after(2, _.bind(function () {
-                if (successCount === 2) {
+            callback = _.after(3, _.bind(function () {
+                if (successCount === 3) {
                     this.trigger("edit");
                     _.bind(options.success || Backbone.$.noop, this)();
                 } else {
@@ -224,6 +251,14 @@
                 _id: this.get("vegaId")
             });
             file.updateContents(JSON.stringify(this.get("vega"), null, 4));
+            file.on("g:upload.complete", success);
+            file.on("g:upload.error", callback);
+
+            // Update the timeline data.
+            file = new girder.models.FileModel({
+                _id: this.get("timelineId")
+            });
+            file.updateContents(JSON.stringify(this.get("timeline"), null, 4));
             file.on("g:upload.complete", success);
             file.on("g:upload.error", callback);
 
