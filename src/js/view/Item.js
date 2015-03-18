@@ -135,6 +135,7 @@
             lyra.onload = _.bind(function () {
                 var msg,
                     vega,
+                    timeline,
                     data;
 
                 lyra.onunload = function () {
@@ -149,15 +150,12 @@
                     };
                 } else {
                     vega = this.model.get("vega");
+                    timeline = this.model.get("timeline");
                     msg = {
-                        data: this.model.getData()
+                        data: this.model.getData(),
+                        timeline: timeline,
+                        spec: vega
                     };
-
-                    if (this.timeline) {
-                        msg.timeline = this.timeline;
-                    } else {
-                        msg.spec = vega;
-                    }
                 }
 
                 lyra.postMessage(msg, window.location.origin);
@@ -173,14 +171,12 @@
                     throw new Error("suspicious message received: " + evt);
                 }
 
-                // Set the incoming vega spec on the model.
+                // Set the incoming vega spec on the model, as well as the
+                // timeline object (to revive future editing sessions).
                 this.model.set({
-                    vega: msg.spec
+                    vega: msg.spec,
+                    timeline: msg.timeline
                 });
-
-                // Save the timeline object for future editing
-                // usage in this session.
-                this.timeline = msg.timeline;
 
                 this.trigger("edit_finished");
             }, this);
