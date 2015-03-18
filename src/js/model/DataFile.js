@@ -1,12 +1,10 @@
 /* jshint browser: true */
-/* global Backbone, _ */
+/* global Backbone, _, girder */
 
 (function (app) {
     "use strict";
 
     app.model.DataFile = Backbone.Model.extend({
-        url: app.girder + "/item/",
-
         sync: function (method, model, options) {
             var error;
 
@@ -32,9 +30,9 @@
 
         fetchHandler: function (options) {
             options = options || {};
-            Backbone.ajax({
+            girder.restRequest({
                 method: "GET",
-                url: this.url + this.get("id"),
+                path: "/item/" + this.get("id"),
                 success: _.bind(function (info) {
                     this.set({
                         "name": info.name
@@ -56,9 +54,9 @@
 
         fetchContents: function (options) {
             options = options || {};
-            Backbone.ajax({
+            girder.restRequest({
                 method: "GET",
-                url: this.url + this.get("id") + "/download",
+                path: "/item/" + this.get("id") + "/download",
                 dataType: "json",
                 success: _.bind(function (contents) {
                     this.set("contents", contents);

@@ -98,7 +98,7 @@
                 .on("keyup", validateNameDebounced);
 
             dataFiles = new app.collection.DataFiles({
-                user: app.user
+                home: app.home
             });
 
             dataFiles.fetch({

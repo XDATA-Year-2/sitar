@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _ */
+/* global Backbone, _, girder */
 
 (function (app) {
     "use strict";
@@ -8,16 +8,9 @@
         initialize: function (options) {
             options = options || {};
 
-            if (!options.user) {
-                throw new Error("'user' option is required");
-            }
-
             if (!options.folderId) {
                 throw new Error("'folderId' option is required");
             }
-
-            this.user = options.user;
-            this.girderRequest = app.util.girderRequester(app.girder, this.user.get("token"));
 
             this.folderId = options.folderId;
         },
@@ -38,15 +31,14 @@
         parse: function (items) {
             return _.map(items, function (item) {
                 return new this.model({
-                    id: item._id,
-                    user: this.user
+                    id: item._id
                 });
             }, this);
         },
 
         readHandler: function (options) {
-            return this.girderRequest({
-                url: "/item",
+            return girder.restRequest({
+                path: "/item",
                 data: {
                     folderId: this.folderId
                 },
@@ -63,11 +55,7 @@
             initialize: function (options) {
                 options = options || {};
 
-                if (!options.user) {
-                    throw new Error("'user' option is required");
-                }
-
-                options.folderId = options.user.get(folderIdField);
+                options.folderId = options.home.get(folderIdField);
 
                 app.collection.Files.prototype.initialize.call(this, options);
             }
