@@ -55,7 +55,7 @@
             initialize: function (options) {
                 options = options || {};
 
-                options.folderId = options.user.get(folderIdField);
+                options.folderId = options.home.get(folderIdField);
 
                 app.collection.Files.prototype.initialize.call(this, options);
             }

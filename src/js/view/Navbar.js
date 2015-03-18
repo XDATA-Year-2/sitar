@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, d3 */
+/* global Backbone, d3, girder */
 
 (function (app) {
     "use strict";
@@ -14,13 +14,18 @@
                 throw new Error("'model' option is required");
             }
 
-            this.listenTo(this.model, "change:name", this.render);
+            this.listenTo(this.model, "change", this.render);
         },
 
         render: function () {
+            var name = "";
+            if (this.model.get("firstName")) {
+                name = this.model.get("firstName") + " " + this.model.get("lastName")[0] + ".";
+            }
+
             d3.select(this.el)
                 .html(app.templates.navbar({
-                    name: this.model.get("name")
+                    name: name
                 }));
         },
 
@@ -33,15 +38,12 @@
         },
 
         logout: function () {
-            this.model.destroy({
-                success: function () {
+            girder.logout()
+                .then(function () {
                     app.router.setjmp(null);
-                },
-
-                error: function () {
+                }, function () {
                     throw new Error("the impossible has happened");
-                }
-            });
+                });
         }
     });
 }(window.app));

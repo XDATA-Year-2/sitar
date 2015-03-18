@@ -30,8 +30,7 @@
                     success: _.bind(function () {
                         this.model.set("png", window.atob(this.pngB64()));
                         this.model.save({}, {
-                            user: app.user,
-                            folderId: app.user.get("visFolder"),
+                            folderId: app.home.get("visFolder"),
                             success: _.bind(function () {
                                 app.router.navigate("vis/" + this.model.get("id"), {
                                     trigger: false,
@@ -216,7 +215,7 @@
             var me = d3.select(this.el),
                 vega,
                 dataFiles = new app.collection.DataFiles({
-                    user: app.user
+                    home: app.home
                 });
 
             // Populate the div with the template text.
@@ -236,8 +235,6 @@
                         .remove();
 
                     dataFiles.fetch({
-                        user: app.user,
-
                         success: function () {
                             var render;
 
