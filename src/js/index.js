@@ -24,11 +24,6 @@ $(function () {
         .then(function (userData) {
             if (userData) {
                 app.home.user.set(userData);
-                app.home.fetch({
-                    success: function () {
-                        Backbone.history.start();
-                    }
-                });
             }
 
             // A view for the navbar.
@@ -38,8 +33,6 @@ $(function () {
             });
             app.navbar.render();
 
-            if (!userData) {
-                Backbone.history.start();
-            }
+            Backbone.history.start();
         });
 });

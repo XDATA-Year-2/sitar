@@ -63,6 +63,7 @@
                 app.home.fetch({
                     success: _.bind(function () {
                         this.gallery();
+                        return;
                     }, this)
                 });
             } else {
@@ -83,6 +84,13 @@
 
             if (app.home.user.isNew()) {
                 this.setjmp("vis/" + itemId);
+            } else if (!app.home.isValid()) {
+                app.home.fetch({
+                    success: _.bind(function () {
+                        this.item(itemId);
+                        return;
+                    }, this)
+                });
             } else {
                 view = new app.view.Item({
                     el: d3.select("#content").append("div").node(),
