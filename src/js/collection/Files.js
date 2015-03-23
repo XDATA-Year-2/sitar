@@ -55,6 +55,10 @@
             initialize: function (options) {
                 options = options || {};
 
+                if (!options.home) {
+                    throw new Error("option 'home' is required");
+                }
+
                 options.folderId = options.home.get(folderIdField);
 
                 app.collection.Files.prototype.initialize.call(this, options);
