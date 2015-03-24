@@ -1,4 +1,4 @@
-/* jshint browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, _, d3, vg */
 
 (function (app) {
@@ -16,6 +16,10 @@
             if (!this.model) {
                 throw new Error("fatal: must specify a model");
             }
+
+            this.tag = _.times(16, function () {
+                return _.sample("0123456789abcdef");
+            }).join("");
 
             this.listenTo(this.model, "change:vega", this.render);
 
@@ -215,7 +219,9 @@
                 });
 
             // Populate the div with the template text.
-            me.html(app.templates.item());
+            me.html(app.templates.item({
+                tag: this.tag
+            }));
 
             // Attach a handler to fill in the dataset menu whenever the dialog
             // box is invoked.
