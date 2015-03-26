@@ -129,14 +129,12 @@
             });
 
             view.render();
-            if (!view.edit()) {
-                app.curview.trigger("popup-blocked");
-                view.remove();
-                return;
-            }
+            view.edit();
 
             app.navbar.show();
             this.replaceView(view);
+
+            return view.tag;
         }
     });
 }(window.app));
