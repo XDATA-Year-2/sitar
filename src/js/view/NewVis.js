@@ -5,14 +5,6 @@
     "use strict";
 
     app.view.NewVis = Backbone.View.extend({
-        initialize: function () {
-            this.on("popup-blocked", function () {
-                d3.select(this.el)
-                    .select(".bg-danger")
-                    .classed("hidden", false);
-            }, this);
-        },
-
         render: function () {
             var dataFiles,
                 validateName,
