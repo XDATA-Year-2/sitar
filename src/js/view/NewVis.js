@@ -5,14 +5,6 @@
     "use strict";
 
     app.view.NewVis = Backbone.View.extend({
-        initialize: function () {
-            this.on("popup-blocked", function () {
-                d3.select(this.el)
-                    .select(".bg-danger")
-                    .classed("hidden", false);
-            }, this);
-        },
-
         render: function () {
             var dataFiles,
                 validateName,
@@ -82,7 +74,9 @@
 
                     this.model.setData(dataFiles.get(select.selectedOptions[0].getAttribute("data-id")), {
                         success: _.bind(function () {
-                            app.router.showItem(this.model);
+                            var tag = app.router.showItem(this.model);
+                            this.other.location = "/lyra/?editormode=" + tag;
+                            delete this.other;
                         }, this)
                     });
                 }, this));
@@ -147,12 +141,27 @@
             d3.select(this.el)
                 .select(".btn-next")
                 .text("OK");
+
+            this.delegateEvents({
+                // NOTE: the "after" is needed because this callback reacts to
+                // the mouse click release that leads to calling okButton() in
+                // the first place - we mask that instance and allow the actual
+                // thing to happen when the user clicks on the button "for
+                // real".
+                "click .btn-next": _.after(2, function () {
+                    this.other = window.open("", "_blank");
+                })
+            });
         },
 
         nextButton: function () {
             d3.select(this.el)
                 .select(".btn-next")
                 .html("Next <span class=\"glyphicon glyphicon-arrow-right\"></span>");
+
+            this.delegateEvents({
+                "click .btn-next": null
+            });
         }
     });
 }(window.app));

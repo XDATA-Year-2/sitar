@@ -10,7 +10,7 @@ include ../mixins/modal.jade
             .row
                 button(type="button" data-toggle="modal" data-target="#set-data").btn.btn-default Set data
             .row
-                button(type="button").btn.btn-default.edit Edit
+                a(role="button" href="/lyra/?editormode=#{tag}" target="_blank").btn.btn-default.edit Edit
             .row
                 .btn-group
                     button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.export Export #[span.caret]

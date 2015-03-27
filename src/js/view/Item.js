@@ -6,7 +6,7 @@
 
     app.view.Item = Backbone.View.extend({
         events: {
-            "click button.edit": "edit",
+            "click a.edit": "edit",
             "click a.export-svg": "exportSVG",
             "click a.export-png": "exportPNG",
             "click a.export-vega": "exportVega"
@@ -16,6 +16,10 @@
             if (!this.model) {
                 throw new Error("fatal: must specify a model");
             }
+
+            this.tag = "sitar_" + _.times(16, function () {
+                return _.sample("0123456789abcdef");
+            }).join("");
 
             this.listenTo(this.model, "change:vega", this.render);
 
@@ -124,52 +128,23 @@
         },
 
         edit: function () {
-            var lyra,
+            var msg,
                 handler;
 
-            lyra = window.open("/lyra", "_blank");
-            if (!lyra) {
-                return false;
+            if (this.model.isNew()) {
+                msg = {
+                    data: this.model.getData()
+                };
+            } else {
+                msg = {
+                    data: this.model.getData(),
+                    timeline: this.model.get("timeline"),
+                    spec: this.model.get("vega")
+                };
             }
 
-            lyra.onload = _.bind(function () {
-                var msg,
-                    vega,
-                    timeline,
-                    data;
-
-                lyra.onunload = function () {
-                    // Ensure that the message reception was a one-shot deal.
-                    window.removeEventListener("message", handler);
-                };
-
-                if (this.model.isNew()) {
-                    data = this.model.getData();
-                    msg = {
-                        data: data
-                    };
-                } else {
-                    vega = this.model.get("vega");
-                    timeline = this.model.get("timeline");
-                    msg = {
-                        data: this.model.getData(),
-                        timeline: timeline,
-                        spec: vega
-                    };
-                }
-
-                lyra.postMessage(msg, window.location.origin);
-            }, this);
-
-            handler = _.bind(function (evt) {
-                var msg = evt.data,
-                    source = evt.source;
-
-                // Check to make sure it was the lyra window that sent this
-                // message.
-                if (source !== lyra) {
-                    throw new Error("suspicious message received: " + evt);
-                }
+            handler = _.bind(function () {
+                var msg = JSON.parse(localStorage.getItem(this.tag));
 
                 // Set the incoming vega spec on the model, as well as the
                 // timeline object (to revive future editing sessions).
@@ -179,11 +154,15 @@
                 });
 
                 this.trigger("edit_finished");
+
+                window.removeEventListener("storage", handler);
+
+                localStorage.removeItem(this.tag);
             }, this);
 
-            window.addEventListener("message", handler);
+            localStorage.setItem(this.tag, JSON.stringify(msg));
 
-            return true;
+            window.addEventListener("storage", handler);
         },
 
         exportURL: function (url, savefile) {
@@ -215,7 +194,9 @@
                 });
 
             // Populate the div with the template text.
-            me.html(app.templates.item());
+            me.html(app.templates.item({
+                tag: this.tag
+            }));
 
             // Attach a handler to fill in the dataset menu whenever the dialog
             // box is invoked.
