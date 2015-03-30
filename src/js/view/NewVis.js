@@ -17,7 +17,6 @@
 
             validateName = _.bind(function () {
                 var name,
-                    desc,
                     me;
 
                 me = d3.select(this.el);
@@ -25,10 +24,7 @@
                 name = me.select(".vis-name")
                     .property("value");
 
-                desc = me.select(".vis-description")
-                    .property("value");
-
-                if (name && desc) {
+                if (name) {
                     this.enableNext();
                 } else {
                     this.disableNext();
