@@ -186,7 +186,7 @@
             this.exportURL(this.vegaURL(), this.model.get("title") + ".json");
         },
 
-        setupPlacard: function (placardSelector, headerTag) {
+        setupPlacard: function (placardSelector, headerTag, updateFunc) {
             var placard,
                 header,
                 text,
@@ -245,13 +245,14 @@
             placard.placard({
                 externalClickAction: "",
 
-                onAccept: function (state) {
+                onAccept: _.bind(function (state) {
                     if (state.previousValue !== state.value) {
                         text.text(state.value);
+                        updateFunc(state.value);
                     }
 
                     hide();
-                },
+                }, this),
 
                 onCancel: hide
             });
@@ -280,8 +281,8 @@
             }));
 
             // Set up the editable placards.
-            this.setupPlacard(".title-placard", "h1");
-            this.setupPlacard(".description-placard", "h2");
+            this.setupPlacard(".title-placard", "h1", _.bind(this.model.updateTitle, this.model));
+            this.setupPlacard(".description-placard", "h2", _.bind(this.model.updateDescription, this.model));
 
             // Attach a handler to fill in the dataset menu whenever the dialog
             // box is invoked.

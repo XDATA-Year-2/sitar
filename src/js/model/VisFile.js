@@ -226,6 +226,30 @@
             });
         },
 
+        updateTitle: function (title, options) {
+            options = options || {};
+
+            girder.restRequest({
+                method: "PUT",
+                path: "/item/" + this.id,
+                data: {
+                    name: title
+                }
+            }).then(options.success || Backbone.$.noop, options.error || Backbone.$.noop);
+        },
+
+        updateDescription: function (description, options) {
+            options = options || {};
+
+            girder.restRequest({
+                method: "PUT",
+                path: "/item/" + this.id,
+                data: {
+                    description: description
+                }
+            }).then(options.success || Backbone.$.noop, options.error || Backbone.$.noop);
+        },
+
         updateHandler: function (options) {
             var successCount = 0,
                 file,
