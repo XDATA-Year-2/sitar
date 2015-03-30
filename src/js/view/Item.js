@@ -195,6 +195,8 @@
 
             // Populate the div with the template text.
             me.html(app.templates.item({
+                title: this.model.get("title"),
+                description: this.model.get("description"),
                 tag: this.tag
             }));
 

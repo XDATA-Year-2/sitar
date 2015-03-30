@@ -5,16 +5,17 @@ include ../mixins/modal.jade
 
 .container
     .row
-        .col-md-8.vis.border
-        .col-md-4
-            .row
-                button(type="button" data-toggle="modal" data-target="#set-data").btn.btn-default Set data
-            .row
-                a(role="button" href="/lyra/?editormode=#{tag}" target="_blank").btn.btn-default.edit Edit
-            .row
-                .btn-group
-                    button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.export Export #[span.caret]
-                    ul(role="menu").dropdown-menu
-                        li #[a.virtual-link.export-png PNG]
-                        li #[a.virtual-link.export-svg SVG]
-                        li #[a.virtual-link.export-vega Vega]
+        h1 #{title}
+    .row
+        h2 #{description}
+    .row
+        .vis.border
+    .row
+        button(type="button" data-toggle="modal" data-target="#set-data").btn.btn-default Set data
+        a(role="button" href="/lyra/?editormode=#{tag}" target="_blank").btn.btn-default.edit Edit
+        .btn-group
+            button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.export Export #[span.caret]
+            ul(role="menu").dropdown-menu
+                li #[a.virtual-link.export-png PNG]
+                li #[a.virtual-link.export-svg SVG]
+                li #[a.virtual-link.export-vega Vega]
