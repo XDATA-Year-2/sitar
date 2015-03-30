@@ -186,6 +186,85 @@
             this.exportURL(this.vegaURL(), this.model.get("title") + ".json");
         },
 
+        setupPlacard: function (placardSelector, headerTag) {
+            var placard,
+                header,
+                text,
+                edit,
+                jqSel,
+                d3Sel,
+                hide,
+                show;
+
+            // Convenience functions for converting from one selection type to
+            // the other.
+            //
+            // One for d3-to-jquery...
+            jqSel = function (s) {
+                return Backbone.$(s.node());
+            };
+
+            // ...and one for jquery-to-d3.
+            d3Sel = function (s) {
+                return d3.select(s.get(0));
+            };
+
+            // The top-level placard-bearing element.
+            placard = this.$(placardSelector);
+
+            // The actual title header for the placard.
+            header = d3.select(this.el)
+                .select(headerTag);
+
+            // This contains the title text.
+            text = header.select("span");
+
+            // And this contains the link to initiate the edit.
+            edit = header.select("a");
+
+            // Convenience functions for showing/hiding the active placard.
+            //
+            // Hiding entails: hiding the placard itself, then making the
+            // placard element invisible and the header element visible.
+            hide = function () {
+                placard.placard("hide");
+
+                d3Sel(placard).classed("hidden", true);
+                header.classed("hidden", false);
+            };
+
+            // Showing is just the opposite.
+            show = function () {
+                header.classed("hidden", true);
+                d3Sel(placard).classed("hidden", false);
+
+                placard.placard("show");
+            };
+
+            // Instantiate the placard with custom accept/cancel functions.
+            placard.placard({
+                externalClickAction: "",
+
+                onAccept: function (state) {
+                    if (state.previousValue !== state.value) {
+                        text.text(state.value);
+                    }
+
+                    hide();
+                },
+
+                onCancel: hide
+            });
+
+            // React to a click on the edit link.
+            jqSel(edit).on("click", _.bind(function (e) {
+                e.preventDefault();
+
+                placard.placard("setValue", text.text());
+                show();
+            }, this));
+        },
+
         render: function (options) {
             var me = d3.select(this.el),
                 vega,
@@ -199,6 +278,10 @@
                 description: this.model.get("description"),
                 tag: this.tag
             }));
+
+            // Set up the editable placards.
+            this.setupPlacard(".title-placard", "h1");
+            this.setupPlacard(".description-placard", "h2");
 
             // Attach a handler to fill in the dataset menu whenever the dialog
             // box is invoked.
