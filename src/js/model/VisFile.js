@@ -173,8 +173,8 @@
                 path: "/item",
                 data: {
                     folderId: options.folderId,
-                    name: this.get("title") || "new vis",
-                    description: this.get("description") || "new descriptionless vis!!"
+                    name: this.get("title"),
+                    description: this.get("description") || ""
                 },
                 success: _.bind(function (item) {
                     var finalize,
