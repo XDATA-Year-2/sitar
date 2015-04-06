@@ -1,8 +1,5 @@
 include ../mixins/modal.jade
 
-+modal("Select data set", "Cancel", "Select")(id="set-data")
-    p Select a dataset #[select]
-
 .container
     .row
         h1 #[span #{title}] #[a(href="#") #[span.glyphicon.glyphicon-pencil.normal-font-size]]
@@ -23,12 +20,11 @@ include ../mixins/modal.jade
     .row
         .vis.border
     .row
-        button(type="button" data-toggle="modal" data-target="#set-data").btn.btn-default Set data
-        a(role="button" href="/lyra/?editormode=#{tag}" target="_blank").btn.btn-default.edit Edit
+        a(href="/lyra/?editormode=#{tag}" target="_blank").edit: span.glyphicon.glyphicon-pencil
         .btn-group
-            button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.export Export #[span.caret]
+            a(data-toggle="dropdown").virtual-link.dropdown-toggle.export: span.glyphicon.glyphicon-download-alt
             ul(role="menu").dropdown-menu
                 li #[a.virtual-link.export-png PNG]
                 li #[a.virtual-link.export-svg SVG]
                 li #[a.virtual-link.export-vega Vega]
-        a(role="button").btn.btn-primary.pull-right.delete Delete
+        a.virtual-link.pull-right.delete: span(style="color: red;").glyphicon.glyphicon-trash

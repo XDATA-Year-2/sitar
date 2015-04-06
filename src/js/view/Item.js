@@ -279,10 +279,7 @@
 
         render: function (options) {
             var me = d3.select(this.el),
-                vega,
-                dataFiles = new app.collection.DataFiles({
-                    home: app.home
-                });
+                vega;
 
             // Populate the div with the template text.
             me.html(app.templates.item({
@@ -294,75 +291,6 @@
             // Set up the editable placards.
             this.setupPlacard(".title-placard", "h1", _.bind(this.model.updateTitle, this.model));
             this.setupPlacard(".description-placard", "h2", _.bind(this.model.updateDescription, this.model));
-
-            // Attach a handler to fill in the dataset menu whenever the dialog
-            // box is invoked.
-            Backbone.$("#set-data")
-                .on("show.bs.modal", function () {
-                    var select,
-                        view;
-
-                    select = d3.select(this)
-                        .select("select");
-
-                    select.selectAll("option")
-                        .remove();
-
-                    dataFiles.fetch({
-                        success: function () {
-                            var render;
-
-                            view = new app.view.DataMenu({
-                                collection: dataFiles,
-                                el: select.node()
-                            });
-
-                            render = _.after(dataFiles.models.length, _.bind(view.render, view));
-
-                            _.each(dataFiles.models, function (m) {
-                                // (The success callback is wrapped with
-                                // _.after(), so the underlying function
-                                // (view.render()) won't be called until the
-                                // last model is fetched).
-                                m.fetch({
-                                    success: render
-                                });
-                            });
-                        }
-                    });
-                });
-
-            d3.select("#set-data")
-                .select("button.accept")
-                .on("click", _.bind(function () {
-                    var select,
-                        dataId;
-
-                    select = d3.select(this.el)
-                        .select("select")
-                        .node();
-
-                    Backbone.$("#set-data")
-                        .modal("hide");
-
-                    dataId = select.selectedOptions[0].getAttribute("data-id");
-
-                    dataFiles.get(dataId)
-                        .fetchContents({
-                            success: _.bind(function (model) {
-                                var name = model.get("name").split(".")[0];
-
-                                this.model.set("data", {
-                                    name: name,
-                                    values: model.get("contents")
-                                });
-                            }, this),
-
-                            error: function (_, response) {
-                                throw response;
-                            }
-                        });
-                }, this));
 
             // Render the spec to the main canvas element.
             vega = this.model.get("vega");
