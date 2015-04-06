@@ -7,6 +7,7 @@
     app.view.Item = Backbone.View.extend({
         events: {
             "click a.edit": "edit",
+            "click a.delete": "delete",
             "click a.export-svg": "exportSVG",
             "click a.export-png": "exportPNG",
             "click a.export-vega": "exportVega"
@@ -163,6 +164,16 @@
             localStorage.setItem(this.tag, JSON.stringify(msg));
 
             window.addEventListener("storage", handler);
+        },
+
+        delete: function () {
+            this.model.destroy({
+                success: function () {
+                    app.router.navigate("gallery", {
+                        trigger: true
+                    });
+                }
+            });
         },
 
         exportURL: function (url, savefile) {
