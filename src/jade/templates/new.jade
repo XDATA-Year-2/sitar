@@ -13,6 +13,16 @@
             h2 Select a data set to bind to the new visualization
             select.dataset
 
+            h2 Or upload a new data file
+
+            .container
+                .row
+                    label(for="filesel").btn.btn-primary Select File
+                        input#filesel(type="file" style="display: none;")
+                    span#filename
+                    span &nbsp;
+                        a#remove.virtual-link.small.hidden (remove)
+
         .step-pane.sample-pane(data-step="2")
             h2 Choose a name and description for the new visualization
 
