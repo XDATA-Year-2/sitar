@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _, d3 */
+/* global Backbone, _, d3, girder */
 
 (function (app) {
     "use strict";
@@ -106,10 +106,15 @@
                     if (this.file) {
                         reader = new FileReader();
                         reader.onload = _.bind(function () {
-                            var data = JSON.parse(reader.result);
+                            var file,
+                                text = reader.result,
+                                data = JSON.parse(text);
 
                             this.model.setRawData(this.file.name, data);
                             launchLyra();
+
+                            file = new girder.models.FileModel();
+                            file.uploadToFolder(app.home.get("dataFolder"), text, this.file.name);
                         }, this);
 
                         reader.readAsText(that.file);
