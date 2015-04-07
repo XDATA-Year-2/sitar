@@ -311,6 +311,13 @@
             });
         },
 
+        setRawData: function (name, data) {
+            this.set("data", {
+                name: name,
+                values: data
+            });
+        },
+
         setData: function (datafile, options) {
             datafile.fetch({
                 fetchContents: true,
