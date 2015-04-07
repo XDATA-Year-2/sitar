@@ -13,18 +13,23 @@
             };
 
             switch (method) {
-                case "create":
-                    throw error();
+                case "create": {
+                    this.createHandler(options);
+                    break;
+                }
 
-                case "read":
+                case "read": {
                     this.fetchHandler(options);
                     break;
+                }
 
-                case "update":
+                case "update": {
                     throw error();
+                }
 
-                case "delete":
+                case "delete": {
                     throw error();
+                }
             }
         },
 
@@ -35,7 +40,7 @@
                 path: "/item/" + this.get("id"),
                 success: _.bind(function (info) {
                     this.set({
-                        "name": info.name
+                        name: info.name
                     });
 
                     if (options.fetchContents) {
