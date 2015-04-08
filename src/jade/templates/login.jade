@@ -1,3 +1,5 @@
+include ../mixins/modal.jade
+
 .jumbotron
     h1 Sitar Visualization Gallery
 
@@ -22,7 +24,7 @@
                 span.col-md-offset-4.col-md-2
                     button(type="submit").btn.btn-lg.btn-info.btn-block Log in
                 span.col-md-2
-                    button(disabled).btn.btn-lg.btn-info.btn-block.register Register
+                    button(type="button" data-toggle="modal" data-target="#register-dialog").btn.btn-lg.btn-info.btn-block.register Register
 
     .alert.alert-info(class=jumpback ? "" : "hidden")#jumpback.
         You must be logged in to visit that page.  Please log in and we will return you there.
@@ -35,3 +37,35 @@
          #[a(href="http://idl.cs.washington.edu/projects/lyra/") Lyra],
          #[a(href="http://tangelo.kitware.com") Tangelo],
          and #[a(href="https://github.com/girder/girder") Girder]
+
++modal("Welcome!", "Cancel", "OK")(id="register-dialog")
+    p Register a Sitar account by providing the information in the following fields.
+    form
+        .container-fluid
+            .row
+                #r-username.col-md-offset-2.col-md-8.transient
+                    label(for="r-username").sr-only
+                    input(type="username" placeholder="Username").form-control
+            .row
+                #r-email.col-md-offset-2.col-md-8.transient
+                    label(for="r-email").sr-only
+                    input(type="email" placeholder="Email address").form-control
+            .row
+                #r-firstname.col-md-offset-2.col-md-8.transient
+                    label(for="r-firstname").sr-only
+                    input(type="text" placeholder="First name").form-control
+            .row
+                #r-lastname.col-md-offset-2.col-md-8.transient
+                    label(for="r-lastname").sr-only
+                    input(type="text" placeholder="Last name").form-control
+            .row
+                #r-password.col-md-offset-2.col-md-8.transient
+                    label(for="r-password").sr-only
+                    input(type="password" placeholder="Password").form-control
+            .row
+                #r-password2.col-md-offset-2.col-md-8.transient
+                    label(for="r-password2").sr-only
+                    input(type="password" placeholder="Repeat password").form-control
+            .row
+                .col-md-12
+                    #validation.alert.alert-danger.hidden
