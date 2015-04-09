@@ -7,7 +7,7 @@
     app.router.Router = Backbone.Router.extend({
         routes: {
             "": "login",
-            gallery: "gallery",
+            "gallery(/:username)": "gallery",
             "vis/new": "create",
             "vis/:itemId": "item"
         },
