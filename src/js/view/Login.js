@@ -134,8 +134,8 @@
                     this.$("#register-dialog").modal("hide");
 
                     this.$("#register-dialog").on("hidden.bs.modal", function () {
-                        app.home.user.current();
-                        app.home.user.once("change", function () {
+                        app.user.current();
+                        app.user.once("change", function () {
                             app.router.longjmp("gallery");
                         });
                     });
@@ -168,7 +168,9 @@
 
             // Attempt to log the user in if not already logged in.
             girder.login(username, password)
-                .then(function () {
+                .then(function (user) {
+                    app.user.set(user);
+
                     d3.select("#jumpback")
                         .classed("hidden", true);
 

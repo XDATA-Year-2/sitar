@@ -38,7 +38,7 @@
         login: function () {
             var view;
 
-            if (app.home.user.isNew()) {
+            if (app.user.isNew()) {
                 view = new app.view.Login({
                     el: d3.select("#content").append("div").classed("down", true).node()
                 });
@@ -49,34 +49,32 @@
 
                 app.navbar.hide();
                 this.replaceView(view);
-            } else {
+
                 this.longjmp("gallery");
             }
         },
 
-        gallery: function () {
-            var view;
+        gallery: function (username) {
+            var view,
+                home;
 
-            if (app.home.user.isNew()) {
-                this.setjmp("gallery");
-            } else if (!app.home.isValid()) {
-                app.home.fetch({
-                    success: _.bind(function () {
-                        this.gallery();
-                        return;
-                    }, this)
-                });
-            } else {
+            username = username || app.user.get("login");
+
+            home = new app.model.SitarRoot({
+                login: username
+            });
+
+            home.fetch().then(_.bind(function () {
                 view = new app.view.Gallery({
                     collection: new app.collection.Visualizations({
-                        home: app.home
+                        home: home
                     }),
                     el: d3.select("#content").append("div").node()
                 });
 
                 app.navbar.show();
                 this.replaceView(view);
-            }
+            }, this));
         },
 
         item: function (itemId) {

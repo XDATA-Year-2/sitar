@@ -1,7 +1,7 @@
-/* jshint browser: true, jquery: true */
+/* jshint browser: true */
 /* global Backbone, girder */
 
-$(function () {
+Backbone.$(function () {
     "use strict";
 
     var app = window.app;
@@ -9,26 +9,22 @@ $(function () {
     // Initialize Girder.
     girder.apiRoot = "/plugin/girder/girder/api/v1";
 
-    // A "sitar root", meaning a girder user coupled with folder ids for data
-    // and visualizations belonging to that user.
-    app.home = new app.model.SitarRoot();
-    girder.events.on("g:login.success", function (userData) {
-        app.home.user.set(userData);
-    });
-    girder.events.on("g:logout.success", app.home.user.clear, app.home.user);
+    // The logged in Girder user.
+    app.user = new girder.models.UserModel();
 
+    // A router to control the URL and page content.
     app.router = new app.router.Router();
 
     // Check for a logged in user, and proceed from here.
     girder.fetchCurrentUser()
         .then(function (userData) {
             if (userData) {
-                app.home.user.set(userData);
+                app.user.set(userData);
             }
 
             // A view for the navbar.
             app.navbar = new app.view.Navbar({
-                model: app.home.user,
+                model: app.user,
                 el: "#navbar"
             });
             app.navbar.render();

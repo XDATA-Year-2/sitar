@@ -6,15 +6,19 @@
 
     // A model of the locations Sitar looks for visualizations and data.
     app.model.SitarRoot = Backbone.Model.extend({
-        initialize: function () {
-            this.user = new girder.models.UserModel();
+        initialize: function (options) {
+            options = options || {};
+            this.login = options.login;
+
+            if (!this.login) {
+                throw new Error("option 'login' is required");
+            }
         },
 
         sync: function (method, model, options) {
             switch (method) {
                 case "read": {
-                    this.readHandler(options);
-                    break;
+                    return this.readHandler(options);
                 }
 
                 default: {
@@ -44,19 +48,30 @@
             failure = Backbone.$.Deferred();
             failure.reject();
 
-            if (this.user.isNew()) {
-                this.clear();
-                return;
-            }
-
-            girder.restRequest({
-                path: "/folder",
+            return girder.restRequest({
+                method: "GET",
+                path: "/user",
                 data: {
-                    parentType: "user",
-                    parentId: this.user.get("_id"),
-                    text: "sitar"
+                    text: this.login
                 }
-            }).then(function (home) {
+            }).then(_.bind(function (users) {
+                users = _.where(users, {
+                    login: this.login
+                });
+
+                if (users.length === 0) {
+                    return failure;
+                }
+
+                return girder.restRequest({
+                    path: "/folder",
+                    data: {
+                        parentType: "user",
+                        parentId: users[0]._id,
+                        text: "sitar"
+                    }
+                });
+            }, this)).then(function (home) {
                 home = home && home[0] && home[0]._id;
 
                 if (home) {
