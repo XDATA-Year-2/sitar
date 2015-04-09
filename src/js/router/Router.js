@@ -80,15 +80,8 @@
         item: function (itemId) {
             var view;
 
-            if (app.home.user.isNew()) {
+            if (app.user.isNew()) {
                 this.setjmp("vis/" + itemId);
-            } else if (!app.home.isValid()) {
-                app.home.fetch({
-                    success: _.bind(function () {
-                        this.item(itemId);
-                        return;
-                    }, this)
-                });
             } else {
                 view = new app.view.Item({
                     el: d3.select("#content").append("div").node(),
@@ -105,7 +98,7 @@
         create: function () {
             var view;
 
-            if (app.home.user.isNew()) {
+            if (app.user.isNew()) {
                 this.setjmp("vis/new");
             } else {
                 view = new app.view.NewVis({
