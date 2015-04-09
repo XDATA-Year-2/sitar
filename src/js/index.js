@@ -30,5 +30,9 @@ Backbone.$(function () {
             app.navbar.render();
 
             Backbone.history.start();
+
+            app.router.navigate("", {
+                trigger: true
+            });
         });
 });

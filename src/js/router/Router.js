@@ -49,8 +49,10 @@
 
                 app.navbar.hide();
                 this.replaceView(view);
-
-                this.longjmp("gallery");
+            } else {
+                this.navigate("gallery", {
+                    trigger: true
+                });
             }
         },
 
