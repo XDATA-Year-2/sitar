@@ -71,7 +71,8 @@
                     collection: new app.collection.Visualizations({
                         home: home
                     }),
-                    el: d3.select("#content").append("div").node()
+                    el: d3.select("#content").append("div").node(),
+                    newvis: app.user.get("login") === home.login
                 });
 
                 app.navbar.show();
