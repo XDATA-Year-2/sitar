@@ -85,7 +85,8 @@ module.exports = function (grunt) {
         uglify: {
             index: {
                 options: {
-                    sourceMap: true
+                    sourceMap: true,
+                    sourceMapIncludeSources: true
                 },
                 files: {
                     "build/site/js/index.min.js": ["src/js/index.js"],

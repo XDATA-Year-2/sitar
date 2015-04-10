@@ -1,4 +1,4 @@
-/* jshint browser: true */
+/* jshint browser: true, devel: true */
 /* global Backbone, _, d3, girder */
 
 (function (app) {
@@ -8,6 +8,7 @@
         routes: {
             "": "login",
             "gallery(/:username)": "gallery",
+            "browse": "browse",
             "vis/new": "create",
             "vis/:itemId": "item"
         },
@@ -94,6 +95,41 @@
 
                 view.render();
                 show(view);
+            }, this));
+        },
+
+        browse: function () {
+            // Get a list of users on the system.
+            girder.restRequest({
+                method: "GET",
+                path: "/user"
+            }).then(_.bind(function (users) {
+                var logins = _.pluck(users, "login"),
+                    homes = [],
+                    loggedIn = app.user.get("login"),
+                    me,
+                    view;
+                
+                _.each(logins, function (login) {
+                    var home = new app.model.SitarRoot({
+                        login: login
+                    });
+
+                    if (login === loggedIn) {
+                        me = home;
+                    } else {
+                        homes.push(home);
+                    }
+                });
+
+                view = new app.view.Browse({
+                    el: d3.select("#content").append("div").node(),
+                    focus: me,
+                    homes: homes
+                });
+
+                view.render();
+                this.replaceView(view);
             }, this));
         },
 
