@@ -57,7 +57,8 @@
         },
 
         gallery: function (username) {
-            var view,
+            var contentNode,
+                show,
                 home;
 
             username = username || app.user.get("login");
@@ -66,17 +67,33 @@
                 login: username
             });
 
+            show = _.bind(function (view) {
+                app.navbar.show();
+                this.replaceView(view);
+            }, this);
+
+            contentNode = d3.select("#content")
+                .append("div")
+                .node();
+
             home.fetch().then(_.bind(function () {
-                view = new app.view.Gallery({
+                var view = new app.view.Gallery({
                     collection: new app.collection.Visualizations({
                         home: home
                     }),
-                    el: d3.select("#content").append("div").node(),
+                    el: contentNode,
                     newvis: app.user.get("login") === home.login
                 });
 
-                app.navbar.show();
-                this.replaceView(view);
+                show(view);
+            }, this), _.bind(function () {
+                var view = new app.view.GalleryNotFound({
+                    el: contentNode,
+                    username: username
+                });
+
+                view.render();
+                show(view);
             }, this));
         },
 
