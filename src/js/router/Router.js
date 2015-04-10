@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _, d3 */
+/* global Backbone, _, d3, girder */
 
 (function (app) {
     "use strict";
@@ -86,15 +86,24 @@
             if (app.user.isNew()) {
                 this.setjmp("vis/" + itemId);
             } else {
-                view = new app.view.Item({
-                    el: d3.select("#content").append("div").node(),
-                    model: new app.model.VisFile({
-                        id: itemId
-                    })
-                });
+                // Learn who the owner of the vis is.
+                girder.restRequest({
+                    method: "GET",
+                    path: "/item/" + itemId + "/rootpath"
+                }).then(_.bind(function (path) {
+                    var owner = path[0].object.login;
 
-                app.navbar.show();
-                this.replaceView(view);
+                    view = new app.view.Item({
+                        el: d3.select("#content").append("div").node(),
+                        model: new app.model.VisFile({
+                            id: itemId
+                        }),
+                        allowEdit: app.user.get("login") === owner
+                    });
+
+                    app.navbar.show();
+                    this.replaceView(view);
+                }, this));
             }
         },
 
