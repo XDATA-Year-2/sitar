@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Backbone, _, d3 */
+/* global Backbone, _, d3, girder */
 
 (function (app) {
     "use strict";
@@ -7,7 +7,7 @@
     app.router.Router = Backbone.Router.extend({
         routes: {
             "": "login",
-            gallery: "gallery",
+            "gallery(/:username)": "gallery",
             "vis/new": "create",
             "vis/:itemId": "item"
         },
@@ -38,7 +38,7 @@
         login: function () {
             var view;
 
-            if (app.home.user.isNew()) {
+            if (app.user.isNew()) {
                 view = new app.view.Login({
                     el: d3.select("#content").append("div").classed("down", true).node()
                 });
@@ -50,64 +50,84 @@
                 app.navbar.hide();
                 this.replaceView(view);
             } else {
-                this.longjmp("gallery");
+                this.navigate("gallery", {
+                    trigger: true
+                });
             }
         },
 
-        gallery: function () {
-            var view;
+        gallery: function (username) {
+            var contentNode,
+                show,
+                home;
 
-            if (app.home.user.isNew()) {
-                this.setjmp("gallery");
-            } else if (!app.home.isValid()) {
-                app.home.fetch({
-                    success: _.bind(function () {
-                        this.gallery();
-                        return;
-                    }, this)
-                });
-            } else {
-                view = new app.view.Gallery({
-                    collection: new app.collection.Visualizations({
-                        home: app.home
-                    }),
-                    el: d3.select("#content").append("div").node()
-                });
+            username = username || app.user.get("login");
 
+            home = new app.model.SitarRoot({
+                login: username
+            });
+
+            show = _.bind(function (view) {
                 app.navbar.show();
                 this.replaceView(view);
-            }
+            }, this);
+
+            contentNode = d3.select("#content")
+                .append("div")
+                .node();
+
+            home.fetch().then(_.bind(function () {
+                var view = new app.view.Gallery({
+                    collection: new app.collection.Visualizations({
+                        home: home
+                    }),
+                    el: contentNode,
+                    newvis: app.user.get("login") === home.login
+                });
+
+                show(view);
+            }, this), _.bind(function () {
+                var view = new app.view.GalleryNotFound({
+                    el: contentNode,
+                    username: username
+                });
+
+                view.render();
+                show(view);
+            }, this));
         },
 
         item: function (itemId) {
             var view;
 
-            if (app.home.user.isNew()) {
+            if (app.user.isNew()) {
                 this.setjmp("vis/" + itemId);
-            } else if (!app.home.isValid()) {
-                app.home.fetch({
-                    success: _.bind(function () {
-                        this.item(itemId);
-                        return;
-                    }, this)
-                });
             } else {
-                view = new app.view.Item({
-                    el: d3.select("#content").append("div").node(),
-                    model: new app.model.VisFile({
-                        id: itemId
-                    })
-                });
+                // Learn who the owner of the vis is.
+                girder.restRequest({
+                    method: "GET",
+                    path: "/item/" + itemId + "/rootpath"
+                }).then(_.bind(function (path) {
+                    var owner = path[0].object.login;
 
-                app.navbar.show();
-                this.replaceView(view);
+                    view = new app.view.Item({
+                        el: d3.select("#content").append("div").node(),
+                        model: new app.model.VisFile({
+                            id: itemId
+                        }),
+                        allowEdit: app.user.get("login") === owner
+                    });
+
+                    app.navbar.show();
+                    this.replaceView(view);
+                }, this));
             }
         },
 
         create: function () {
             var view;
 
-            if (app.home.user.isNew()) {
+            if (app.user.isNew()) {
                 this.setjmp("vis/new");
             } else {
                 view = new app.view.NewVis({

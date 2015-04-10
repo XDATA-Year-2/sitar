@@ -2,29 +2,41 @@ include ../mixins/modal.jade
 
 .container
     .row
-        h1 #[span #{title}] #[a(href="#") #[span.glyphicon.glyphicon-pencil.normal-font-size]]
-        .placard.title-placard.hidden
-            .placard-popup
-            input.form-control.placard-field(type="text")
-            .placard-footer
-                a.placard-cancel(href="#") Cancel
-                button.btn.btn-primary.btn-xs.placard-accept(type="button") Save
+        if allowEdit
+            h1 #[span #{title}] #[a(href="#") #[span.glyphicon.glyphicon-pencil.normal-font-size]]
+        else
+            h1 #[span #{title}] #[a(href="#")]
+
+        if allowEdit
+            .placard.title-placard.hidden
+                .placard-popup
+                input.form-control.placard-field(type="text")
+                .placard-footer
+                    a.placard-cancel(href="#") Cancel
+                    button.btn.btn-primary.btn-xs.placard-accept(type="button") Save
     .row
-        h2 #[span #{description}] #[a(href="#") #[span.glyphicon.glyphicon-pencil.normal-font-size]]
-        .placard.description-placard.hidden
-            .placard-popup
-            textarea.form-control.placard-field
-            .placard-footer
-                a.placard-cancel(href="#") Cancel
-                button.btn.btn-primary.btn-xs.placard-accept(type="button") Save
+        if allowEdit
+            h2 #[span #{description}] #[a(href="#") #[span.glyphicon.glyphicon-pencil.normal-font-size]]
+        else
+            h2 #[span #{description}] #[a(href="#")]
+
+        if allowEdit
+            .placard.description-placard.hidden
+                .placard-popup
+                textarea.form-control.placard-field
+                .placard-footer
+                    a.placard-cancel(href="#") Cancel
+                    button.btn.btn-primary.btn-xs.placard-accept(type="button") Save
     .row
         .vis.border
     .row
-        a(href="/lyra/?editormode=#{tag}" target="_blank").edit: span.glyphicon.glyphicon-pencil
+        if allowEdit
+            a(href="/lyra/?editormode=#{tag}" target="_blank").edit: span.glyphicon.glyphicon-pencil
         .btn-group
             a(data-toggle="dropdown").virtual-link.dropdown-toggle.export: span.glyphicon.glyphicon-download-alt
             ul(role="menu").dropdown-menu
                 li #[a.virtual-link.export-png PNG]
                 li #[a.virtual-link.export-svg SVG]
                 li #[a.virtual-link.export-vega Vega]
-        a.virtual-link.pull-right.delete: span(style="color: red;").glyphicon.glyphicon-trash
+        if allowEdit
+            a.virtual-link.pull-right.delete: span(style="color: red;").glyphicon.glyphicon-trash

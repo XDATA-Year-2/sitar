@@ -38,12 +38,10 @@
         },
 
         logout: function () {
-            girder.logout()
-                .then(function () {
-                    app.router.setjmp(null);
-                }, function () {
-                    throw new Error("the impossible has happened");
-                });
+            girder.logout();
+            app.user.clear();
+
+            app.router.setjmp(null);
         }
     });
 }(window.app));

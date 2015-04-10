@@ -13,10 +13,14 @@
             "click a.export-vega": "exportVega"
         },
 
-        initialize: function () {
+        initialize: function (options) {
+            options = options || {};
+
             if (!this.model) {
                 throw new Error("fatal: must specify a model");
             }
+
+            this.allowEdit = options.allowEdit;
 
             this.tag = "sitar_" + _.times(16, function () {
                 return _.sample("0123456789abcdef");
@@ -30,22 +34,24 @@
                 });
             }
 
-            this.on("edit_finished", function () {
-                this.render({
-                    success: _.bind(function () {
-                        this.model.set("png", window.atob(this.pngB64()));
-                        this.model.save({}, {
-                            folderId: app.home.get("visFolder"),
-                            success: _.bind(function () {
-                                app.router.navigate("vis/" + this.model.get("id"), {
-                                    trigger: false,
-                                    replace: true
-                                });
-                            }, this)
-                        });
-                    }, this)
-                });
-            }, this);
+            if (this.allowEdit) {
+                this.on("edit_finished", function () {
+                    this.render({
+                        success: _.bind(function () {
+                            this.model.set("png", window.atob(this.pngB64()));
+                            this.model.save({}, {
+                                folderId: app.home.get("visFolder"),
+                                success: _.bind(function () {
+                                    app.router.navigate("vis/" + this.model.get("id"), {
+                                        trigger: false,
+                                        replace: true
+                                    });
+                                }, this)
+                            });
+                        }, this)
+                    });
+                }, this);
+            }
         },
 
         svgURL: function (callback) {
@@ -285,12 +291,15 @@
             me.html(app.templates.item({
                 title: this.model.get("title"),
                 description: this.model.get("description"),
-                tag: this.tag
+                tag: this.tag,
+                allowEdit: this.allowEdit
             }));
 
             // Set up the editable placards.
-            this.setupPlacard(".title-placard", "h1", _.bind(this.model.updateTitle, this.model));
-            this.setupPlacard(".description-placard", "h2", _.bind(this.model.updateDescription, this.model));
+            if (this.allowEdit) {
+                this.setupPlacard(".title-placard", "h1", _.bind(this.model.updateTitle, this.model));
+                this.setupPlacard(".description-placard", "h2", _.bind(this.model.updateDescription, this.model));
+            }
 
             // Render the spec to the main canvas element.
             vega = this.model.get("vega");
