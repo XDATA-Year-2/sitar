@@ -1,0 +1,11 @@
+mixin gallery(items, rowLength)
+    - var numRows = Math.floor(items / rowLength);
+    - var stragglers = items - numRows * rowLength;
+    for i in _.range(numRows)
+        .row
+            for j in _.range(rowLength)
+                .col-md-2 hello
+    if stragglers > 0
+        .row
+            for j in _.range(stragglers)
+                .col-md-2 hello
