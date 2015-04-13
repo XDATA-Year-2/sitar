@@ -1,4 +1,4 @@
-/* jshint browser: true, devel: true */
+/* jshint browser: true */
 /* global Backbone, _, d3, girder */
 
 (function (app) {
@@ -161,20 +161,28 @@
         },
 
         create: function () {
-            var view;
+            var view,
+                home;
 
             if (app.user.isNew()) {
                 this.setjmp("vis/new");
             } else {
-                view = new app.view.NewVis({
-                    el: d3.select("#content").append("div").node(),
-                    model: new app.model.VisFile()
+                home = new app.model.SitarRoot({
+                    login: app.user.get("login")
                 });
 
-                view.render();
+                home.fetch().then(_.bind(function () {
+                    view = new app.view.NewVis({
+                        el: d3.select("#content").append("div").node(),
+                        model: new app.model.VisFile(),
+                        home: home
+                    });
 
-                app.navbar.show();
-                this.replaceView(view);
+                    view.render();
+
+                    app.navbar.show();
+                    this.replaceView(view);
+                }, this));
             }
         },
 

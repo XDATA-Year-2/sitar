@@ -5,8 +5,15 @@
     "use strict";
 
     app.view.NewVis = Backbone.View.extend({
-        initialize: function () {
+        initialize: function (option) {
+            option = option || {};
+
             this.file = null;
+            this.home = option.home;
+
+            if (!this.home) {
+                throw new Error("option 'home' is required");
+            }
         },
 
         render: function () {
@@ -136,7 +143,7 @@
                 .on("keyup", validateNameDebounced);
 
             dataFiles = new app.collection.DataFiles({
-                home: app.home
+                home: this.home
             });
 
             dataFiles.fetch({
