@@ -86,7 +86,8 @@ module.exports = function (grunt) {
             index: {
                 options: {
                     sourceMap: true,
-                    sourceMapIncludeSources: true
+                    sourceMapIncludeSources: true,
+                    beautify: true
                 },
                 files: {
                     "build/site/js/index.min.js": ["src/js/index.js"],
