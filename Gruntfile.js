@@ -72,7 +72,10 @@ module.exports = function (grunt) {
                 eqnull: true,
 
                 // Environment options.
-                browser: true
+                browser: true,
+
+                // Set this to true for debugging, false for release.
+                devel: false
             },
             all: ["Gruntfile.js", "src/js/**/*.js"]
         },
