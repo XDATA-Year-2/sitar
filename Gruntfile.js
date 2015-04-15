@@ -75,7 +75,7 @@ module.exports = function (grunt) {
                 browser: true,
 
                 // Set this to true for debugging, false for release.
-                devel: false
+                devel: true
             },
             all: ["Gruntfile.js", "src/js/**/*.js"]
         },

@@ -23,7 +23,7 @@
 
             this.items = [];
 
-            this.newvis = options.newvis;
+            this.newvis = options.newvis || false;
 
             this.listenTo(this.collection, "sync", _.debounce(this.render, 500));
 
