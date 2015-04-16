@@ -129,6 +129,7 @@
                 });
 
                 view.render();
+                app.navbar.show();
                 this.replaceView(view);
             }, this));
         },
