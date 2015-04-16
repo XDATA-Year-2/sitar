@@ -74,6 +74,8 @@
                         trigger: true
                     });
                 }
+
+                return;
             }
 
             home = new app.model.SitarRoot({

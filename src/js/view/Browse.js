@@ -31,7 +31,7 @@
             // the DOM the panels that don't contain any.
             cullEmpty = _.after(allHomes.length, function () {
                 var panels = d3.selectAll(".panel-body"),
-                    itemGroups = panels.selectAll(".col-md-2");
+                    itemGroups = panels.selectAll(".item");
 
                 _.each(_.range(itemGroups.length), function (i) {
                     if (itemGroups[i].length === 0) {
@@ -42,7 +42,7 @@
             });
 
             d3.select(this.el)
-                .selectAll(".panel-body")
+                .selectAll(".gallery")
                 .data(allHomes)
                 .each(function (home, i) {
                     home.fetch().then(_.bind(function () {

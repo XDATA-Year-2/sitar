@@ -18,9 +18,6 @@
                 throw new Error("fatal: must specify 'el'");
             }
 
-            d3.select(this.el)
-                .classed("container", true);
-
             this.items = [];
 
             this.newvis = options.newvis || false;
@@ -35,11 +32,11 @@
 
             this.$el.html(app.templates.gallery({
                 items: this.collection.length + this.newvis,
-                rowLength: 5
+                rowLength: 6
             }));
 
             d3.select(this.el)
-                .selectAll(".col-md-2")
+                .selectAll(".item")
                 .data((this.newvis ? ["newvis"] : []).concat(this.collection.models))
                 .each(function (visfile) {
                     if (_.isString(visfile)) {
