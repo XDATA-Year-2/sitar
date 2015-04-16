@@ -104,14 +104,12 @@
                 method: "GET",
                 path: "/user"
             }).then(_.bind(function (users) {
-                console.log(users);
-
                 var logins = _.pluck(users, "login"),
                     homes = [],
                     loggedIn = app.user.get("login"),
                     me,
                     view;
-                
+
                 _.each(logins, function (login) {
                     var home = new app.model.SitarRoot({
                         login: login

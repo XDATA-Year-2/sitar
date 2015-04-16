@@ -65,6 +65,8 @@
                         }));
                     }
                 });
+
+            this.trigger("render");
         }
     });
 }(window.app));

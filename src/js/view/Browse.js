@@ -20,22 +20,32 @@
 
         render: function () {
             var allHomes = (this.focus ? [this.focus] : []).concat(this.homes),
-                that = this;
+                that = this,
+                cullEmpty;
 
             this.$el.html(app.templates.browse({
                 users: _.pluck(allHomes, "login")
             }));
 
-            console.log(this.focus);
+            // Examine the subselections of vis items in each panel; remove from
+            // the DOM the panels that don't contain any.
+            cullEmpty = _.after(allHomes.length, function () {
+                var panels = d3.selectAll(".panel-body"),
+                    itemGroups = panels.selectAll(".col-md-2");
+
+                _.each(_.range(itemGroups.length), function (i) {
+                    if (itemGroups[i].length === 0) {
+                        d3.select(panels[0][i].parentElement)
+                            .remove();
+                    }
+                });
+            });
 
             d3.select(this.el)
                 .selectAll(".panel-body")
                 .data(allHomes)
                 .each(function (home, i) {
                     home.fetch().then(_.bind(function () {
-                        console.log("i", i);
-                        console.log("focus", that.focus);
-                        console.log("cond", that.focus && (i === 0));
                         var view = new app.view.Gallery({
                             el: this,
                             collection: new app.collection.Visualizations({
@@ -44,7 +54,7 @@
                             newvis: that.focus && (i === 0)
                         });
 
-                        view.render();
+                        that.listenTo(view, "render", cullEmpty);
                     }, this));
                 });
         }

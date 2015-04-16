@@ -156,8 +156,6 @@
                     path: url,
                     success: callback(i),
                     error: this.errorHandler(options)
-                }).then(function () {
-                    console.log("fetch", url);
                 });
             }, this));
         },
