@@ -28,7 +28,7 @@
                     name: name
                 }));
 
-            this.$("#navbar-login").on("click", function () {
+            this.$(".login").on("click", function () {
                 app.router.setjmp(app.util.currentUrl());
             });
         },
@@ -45,7 +45,7 @@
             girder.logout();
             app.user.clear();
 
-            app.router.setjmp(null);
+            window.location.reload();
         }
     });
 }(window.app));

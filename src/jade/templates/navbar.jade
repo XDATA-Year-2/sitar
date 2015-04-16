@@ -10,6 +10,6 @@ nav.navbar.navbar-default
                             | #[span #{name}] #[span.caret]
                         ul.dropdown-menu(role="menu")
                             li
-                                a(href="#").logout Logout
+                                a.virtual-link.logout Logout
                 else
-                    li: a#navbar-login.virtual-link Login
+                    li: a.login.virtual-link Login

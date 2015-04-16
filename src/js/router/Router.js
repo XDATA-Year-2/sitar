@@ -59,10 +59,22 @@
 
         gallery: function (username) {
             var contentNode,
+                login,
                 show,
                 home;
 
-            username = username || app.user.get("login");
+            if (!username) {
+                login = app.user.get("login");
+                if (login) {
+                    this.navigate("gallery/" + login, {
+                        trigger: true
+                    });
+                } else {
+                    this.navigate("browse", {
+                        trigger: true
+                    });
+                }
+            }
 
             home = new app.model.SitarRoot({
                 login: username
