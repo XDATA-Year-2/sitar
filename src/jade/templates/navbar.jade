@@ -1,8 +1,13 @@
 nav.navbar.navbar-default
     .container-fluid
         .navbar-header
-            a.navbar-brand(href="#") Sitar
+            a.navbar-brand(href="https://github.com/XDATA-Year-2/sitar" target="_blank") Sitar
         .collapse.navbar-collapse
+            if name
+                ul.nav.navbar-nav
+                    li: a(href="#gallery") My Visualizations
+            ul.nav.navbar-nav
+                li: a(href="#browse") Browse
             ul.nav.navbar-nav.navbar-right
                 if name
                     li.dropdown
