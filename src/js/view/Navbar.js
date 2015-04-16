@@ -27,6 +27,10 @@
                 .html(app.templates.navbar({
                     name: name
                 }));
+
+            this.$("#navbar-login").on("click", function () {
+                app.router.setjmp(app.util.currentUrl());
+            });
         },
 
         hide: function () {

@@ -6,6 +6,10 @@
 
     app.util = app.util || {};
 
+    app.util.currentUrl = function () {
+        return window.location.hash.slice(1) + window.location.search;
+    };
+
     app.util.getGirderTokenCookie = function () {
         var cookies = document.cookie.split("; ")
             .map(function (s) {
