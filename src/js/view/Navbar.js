@@ -18,7 +18,7 @@
         },
 
         render: function () {
-            var name = "";
+            var name;
             if (this.model.get("firstName")) {
                 name = this.model.get("firstName") + " " + this.model.get("lastName")[0] + ".";
             }
