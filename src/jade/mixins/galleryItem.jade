@@ -1,0 +1,8 @@
+mixin galleryItem(title, description, posterUrl)
+    a(class="thumbnail virtual-link"): img(src="#{posterUrl}")
+    .row
+        div(class="col-md-12")
+            p.title #{title}
+    .row
+        div(class="col-md-12")
+            p #{description}

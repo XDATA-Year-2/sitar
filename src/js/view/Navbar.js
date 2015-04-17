@@ -18,7 +18,7 @@
         },
 
         render: function () {
-            var name = "";
+            var name;
             if (this.model.get("firstName")) {
                 name = this.model.get("firstName") + " " + this.model.get("lastName")[0] + ".";
             }
@@ -27,6 +27,10 @@
                 .html(app.templates.navbar({
                     name: name
                 }));
+
+            this.$(".login").on("click", function () {
+                app.router.setjmp(app.util.currentUrl());
+            });
         },
 
         hide: function () {
@@ -41,7 +45,7 @@
             girder.logout();
             app.user.clear();
 
-            app.router.setjmp(null);
+            window.location.reload();
         }
     });
 }(window.app));

@@ -26,10 +26,13 @@ include ../mixins/modal.jade
                 span.col-md-2
                     button(type="button" data-toggle="modal" data-target="#register-dialog").btn.btn-lg.btn-info.btn-block.register Register
 
-    .alert.alert-info(class=jumpback ? "" : "hidden")#jumpback.
-        You must be logged in to visit that page.  Please log in and we will return you there.
+    p.
+        If you just want to take a look around you can also #[a(href="/#browse") browse anonymously].
 
-    .alert.alert-danger.hidden#failed.
+    .alert.alert-info.text-center(class=jumpback ? "" : "hidden")#jumpback.
+        After login, you will be returned to the page you came here from.  Enjoy!
+
+    .alert.alert-danger.text-center.hidden#failed.
         Username or password incorrect.
 
     p.footer.
