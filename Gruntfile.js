@@ -75,7 +75,7 @@ module.exports = function (grunt) {
                 browser: true,
 
                 // Set this to true for debugging, false for release.
-                devel: true
+                devel: false
             },
             all: ["Gruntfile.js", "src/js/**/*.js"]
         },
@@ -90,7 +90,7 @@ module.exports = function (grunt) {
                 options: {
                     sourceMap: true,
                     sourceMapIncludeSources: true,
-                    beautify: true
+                    beautify: false
                 },
                 files: {
                     "build/site/js/index.min.js": ["src/js/index.js"],
