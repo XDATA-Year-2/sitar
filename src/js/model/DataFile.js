@@ -1,7 +1,7 @@
 /* jshint browser: true */
 /* global Backbone, _, girder */
 
-(function (app) {
+(function (app, Papa) {
     "use strict";
 
     app.model.DataFile = Backbone.Model.extend({
@@ -58,12 +58,20 @@
         },
 
         fetchContents: function (options) {
+            console.log("yay");
+
             options = options || {};
             girder.restRequest({
                 method: "GET",
                 path: "/item/" + this.get("id") + "/download",
-                dataType: "json",
+                dataType: "text",
                 success: _.bind(function (contents) {
+                    var data;
+
+                    console.log(contents);
+
+                    data = this.parseData(contents);
+
                     this.set("contents", contents);
                     if (options.success) {
                         options.success(this, undefined, options);
@@ -77,4 +85,24 @@
             });
         }
     });
-}(window.app));
+
+    app.model.DataFile.parseData = function (text) {
+        var data;
+
+        try {
+            console.log("attempting json");
+            data = JSON.parse(text);
+        } catch (e) {
+            return;
+            console.log("attempting csv");
+            data = Papa.parse(text, {
+                header: true,
+                dynamicTyping: true
+            });
+
+            console.log(data);
+        }
+
+        return data;
+    };
+}(window.app, window.Papa));

@@ -75,7 +75,7 @@ module.exports = function (grunt) {
                 browser: true,
 
                 // Set this to true for debugging, false for release.
-                devel: false
+                devel: true
             },
             all: ["Gruntfile.js", "src/js/**/*.js"]
         },
@@ -95,6 +95,7 @@ module.exports = function (grunt) {
                 files: {
                     "build/site/js/index.min.js": ["src/js/index.js"],
                     "build/site/js/lib.min.js": ["src/ext/js/jade-runtime.js",
+                                                 "src/ext/js/papaparse.min.js",
                                                  "build/jade/templates.js",
                                                  "src/js/preamble.js",
                                                  "src/js/util.js",

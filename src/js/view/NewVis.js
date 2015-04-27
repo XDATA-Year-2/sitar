@@ -115,7 +115,7 @@
                         reader.onload = _.bind(function () {
                             var file,
                                 text = reader.result,
-                                data = JSON.parse(text);
+                                data = app.model.DataFile.parseData(text);
 
                             this.model.setRawData(this.file.name, data);
                             launchLyra();
